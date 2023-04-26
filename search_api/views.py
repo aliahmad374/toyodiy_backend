@@ -98,19 +98,19 @@ class SubCategoryAPI(APIView):
 class PartsAPI(APIView):
     def get(self,request,format=None,pk=None):        
         subcategory_parameter = request.query_params.get('subcategory_id', None)
-        if id is not None:
+        if subcategory_parameter is not None:
             part = Parts.objects.filter(sub_category_id=subcategory_parameter)
             serializer  = PartsSerializer(part,many=True)
             return Response([{'id':v.get('id'),'name':v.get('part_name')} for v in serializer.data])
-        part = Parts.objects.all()
-        serializer = PartsSerializer(part,many=True)
-        return Response(serializer.data)
+        # part = Parts.objects.all()
+        # serializer = PartsSerializer(part,many=True)
+        # return Response(serializer.data)
     
 
 class PartsDetailAPI(APIView):
     def get(self,request,format=None,pk=None):        
         part_parameter = request.query_params.get('part_id', None)
-        if id is not None:
+        if part_parameter is not None:
             part = Parts.objects.get(id=part_parameter)
             serializer  = PartsSerializer(part)
             return Response(serializer.data)
@@ -118,7 +118,7 @@ class PartsDetailAPI(APIView):
 class PartsNumberAPI(APIView):
     def get(self,request,format=None,pk=None):        
         part_parameter = request.query_params.get('part_number', None)
-        if id is not None:
+        if part_parameter is not None:
             part = Parts.objects.filter(part_number=part_parameter)
             serializer  = PartsSerializer(part,many=True)
             return Response([{'id':v.get('id'),'part_number':v.get('part_number')} for v in serializer.data])
