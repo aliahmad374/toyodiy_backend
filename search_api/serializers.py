@@ -6,7 +6,7 @@ from .models import Category,SubCategory,VehicleEngine,TypeYear,Model,Manufactur
 class CategorySerializer(serializers.ModelSerializer): 
     class Meta:
         model=Category
-        fields = ['id','manufacturer_id','model_id','type_year_id','vehicle_id','category_name']
+        fields = ['id','category_name']
 
 class SubCategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -37,4 +37,4 @@ class ManufacturerSerializer(serializers.ModelSerializer):
 class PartsSerializer(serializers.ModelSerializer): 
     class Meta:
         model=Parts
-        fields = ['id','sub_category_id','engine_code','market','part_number','part_name','quantity_required','part_source','price']
+        fields = ['id','sub_category_id','engine_code','market','part_number','part_name','quantity_required','part_source','price','engine_power']
