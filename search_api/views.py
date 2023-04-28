@@ -110,10 +110,15 @@ class PartsAPI(APIView):
         try:
             subcategory_parameter = request.query_params.get('subcategory_id', None)
             engine_parameter = request.query_params.get('engine_id', None)
-            if subcategory_parameter is not None:
+            if (subcategory_parameter is not None) and (engine_parameter is not None):
                 part = Parts.objects.filter(sub_category_id=subcategory_parameter,engine_power=engine_parameter)
                 serializer  = PartsSerializer(part,many=True)
-                return Response([{'id':v.get('id'),'name':v.get('part_name')} for v in serializer.data])    
+                return Response([{'id':v.get('id'),'name':v.get('part_name')} for v in serializer.data])
+            if (subcategory_parameter is not None) and (engine_parameter == None):
+                part = Parts.objects.filter(sub_category_id=subcategory_parameter)
+                serializer  = PartsSerializer(part,many=True)
+                return Response([{'id':v.get('id'),'name':v.get('part_name')} for v in serializer.data])
+            
         except Exception as e:            
             return Response({'error':'not found'})
     
