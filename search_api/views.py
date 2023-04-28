@@ -75,18 +75,18 @@ class VehicleAPI(APIView):
     
 class CategoryAPI(APIView):
     def get(self,request,format=None):                       
-        manufacture_parameter = request.query_params.get('manufacturer_id', None)
-        model_parameter = request.query_params.get('model_id', None)       
-        year_parameter = request.query_params.get('year_id', None)
-        vehicle_parameter = request.query_params.get('engine_id', None)
+        # manufacture_parameter = request.query_params.get('manufacturer_id', None)
+        # model_parameter = request.query_params.get('model_id', None)       
+        # year_parameter = request.query_params.get('year_id', None)
+        # vehicle_parameter = request.query_params.get('engine_id', None)
 
-        try:
-            if manufacture_parameter is not None and model_parameter is not None and year_parameter is not None and vehicle_parameter is not None:
-                category = Category.objects.filter(manufacturer_id=manufacture_parameter,model_id=model_parameter,type_year_id=year_parameter,vehicle_id=vehicle_parameter)
-                serializer  = CategorySerializer(category,many=True)
-                return Response(serializer.data)
-        except:
-            return Response({'error':'not found'})    
+        # try:
+        #     if manufacture_parameter is not None and model_parameter is not None and year_parameter is not None and vehicle_parameter is not None:
+        #         category = Category.objects.filter(manufacturer_id=manufacture_parameter,model_id=model_parameter,type_year_id=year_parameter,vehicle_id=vehicle_parameter)
+        #         serializer  = CategorySerializer(category,many=True)
+        #         return Response(serializer.data)
+        # except:
+        #     return Response({'error':'not found'})    
         category = Category.objects.all()
         serializer = CategorySerializer(category,many=True)
         return Response(serializer.data)
@@ -109,8 +109,9 @@ class PartsAPI(APIView):
     def get(self,request,format=None,pk=None):        
         try:
             subcategory_parameter = request.query_params.get('subcategory_id', None)
+            engine_parameter = request.query_params.get('engine_id', None)
             if subcategory_parameter is not None:
-                part = Parts.objects.filter(sub_category_id=subcategory_parameter)
+                part = Parts.objects.filter(sub_category_id=subcategory_parameter,engine_power=engine_parameter)
                 serializer  = PartsSerializer(part,many=True)
                 return Response([{'id':v.get('id'),'name':v.get('part_name')} for v in serializer.data])    
         except Exception as e:            
