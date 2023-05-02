@@ -11,6 +11,7 @@ urlpatterns = [
     path('part/', views.PartsAPI.as_view()),
     path('part_detail/', views.PartsDetailAPI.as_view()),
     path('part_number/', views.PartsNumberAPI.as_view()),
+    path('autocomplete/', views.AutoComplete.as_view()),
 ]
 
 
