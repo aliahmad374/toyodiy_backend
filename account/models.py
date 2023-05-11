@@ -4,7 +4,7 @@ from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 
 # Custom User Manager 
 class MyUserManager(BaseUserManager):
-    def create_user(self, email, name,tc, password=None,password2=None):
+    def create_user(self, email, first_name,last_name,address,phone,tc,password=None):
         """
         Creates and saves a User with the given email, name ,tc and password.
         """
@@ -13,23 +13,29 @@ class MyUserManager(BaseUserManager):
 
         user = self.model(
             email=self.normalize_email(email),
-            name=name,
-            tc=tc
+            first_name=first_name,
+            last_name=last_name,            
+            address=address,
+            phone=phone,
+            tc=tc,
         )
 
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, name,tc, password=None):
+    def create_superuser(self, email,first_name,last_name,address,phone,tc, password=None):
         """
         Creates and saves a superuser with the given email, name , tc and password.
         """
         user = self.create_user(
             email,
-            password=password,
-            name=name,
-            tc=tc
+            first_name=first_name,
+            last_name=last_name,
+            address=address,
+            phone=phone,
+            tc=tc,
+            password=password
         )
         user.is_admin = True
         user.save(using=self._db)
@@ -42,8 +48,12 @@ class User(AbstractBaseUser):
         max_length=255,
         unique=True,
     )    
-    name = models.CharField(max_length=200)
+    first_name = models.CharField(max_length=200)
+    last_name = models.CharField(max_length=200)
+    address = models.TextField()
+    phone = models.CharField(max_length=30)
     tc = models.BooleanField()
+    is_verified = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     created_at =  models.DateTimeField(auto_now_add=True)
@@ -52,7 +62,7 @@ class User(AbstractBaseUser):
     objects = MyUserManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['name','tc']
+    REQUIRED_FIELDS = ['first_name','last_name','address','phone','tc']
 
     def __str__(self):
         return self.email
