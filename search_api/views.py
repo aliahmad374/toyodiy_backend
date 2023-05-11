@@ -144,3 +144,18 @@ class PartsNumberAPI(APIView):
                 return Response([{'id':v.get('id'),'part_number':v.get('part_number')} for v in serializer.data])
         except:
             return Response({'error':'not found'})    
+
+
+class AutoComplete(APIView):        
+        def get(self,request,format=None,pk=None):                
+            text_parameter = request.query_params.get('text', None)
+            try:
+                if text_parameter is not None:
+                    part = Parts.objects.filter(part_number__istartswith=text_parameter)
+                    serializer  = PartsSerializer(part,many=True)
+                    # return Response([{'id':v.get('id'),'part_number':v.get('part_number')} for v in serializer.data])
+                    return Response(serializer.data[:10])
+            except:
+                return Response({'error':'not found'})    
+
+
