@@ -73,7 +73,11 @@ class SendPasswordResetEmailSerializer(serializers.Serializer):
                     'to_email':user.email
 
                 }
-                Util.send_email(data)
+                try:
+                    Util.send_email(data)
+                except:
+                    raise serializers.ValidationError('error in your smtp authentication')
+
                 return attrs
             else:
                 raise serializers.ValidationError('You are not verified user Please Verify Your Email')
