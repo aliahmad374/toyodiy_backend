@@ -32,7 +32,11 @@ class UserRegistrationView(APIView):
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             user = serializer.save()
-            send_verification_email(user.email)
+            try:            
+                send_verification_email(user.email)
+            except Exception as E:
+                Response({'msg':'error'+str(E)},status=status.HTTP_400_BAD_REQUEST)
+
             return Response({'msg':'Registration Successfull'},status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
     
@@ -43,7 +47,11 @@ class ReUserVerificationView(APIView):
         if serializer.is_valid(raise_exception=True):
             user = User.objects.get(email=serializer.data['email'])
             if user.is_verified==False:
-                send_verification_email(serializer.data['email'])
+                try:
+                    send_verification_email(serializer.data['email'])
+                except:
+                    Response({'msg':'error'+str(E)},status=status.HTTP_400_BAD_REQUEST)
+
                 return Response({'msg':'Email Verification Send'},status=status.HTTP_201_CREATED)
             else:
                 return Response({'msg':'You are already a Verified User Please Login again'},status=status.HTTP_201_CREATED)
@@ -66,10 +74,7 @@ def send_verification_email(email):
         'to_email':email
 
     }
-    try:
-        Util.send_email(data)
-    except Exception as E:
-       pass    
+    Util.send_email(data)
 
 
 class UserVerificationView(APIView):
