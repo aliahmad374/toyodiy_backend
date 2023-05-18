@@ -37,7 +37,7 @@ class Parts(models.Model):
     quantity_required = models.IntegerField(blank=True, null=True)
     part_source = models.TextField(blank=True, null=True)
     price = models.FloatField(blank=True, null=True)
-    engine_power = models.ForeignKey('VehicleEngine', models.DO_NOTHING, blank=True, null=True)
+    engine_power_id = models.ForeignKey('VehicleEngine', models.DO_NOTHING, blank=True, null=True,db_column='engine_power_id')
 
     class Meta:
         managed = False
@@ -64,6 +64,7 @@ class TypeYear(models.Model):
 
 
 class VehicleEngine(models.Model):
+    id = models.AutoField(primary_key=True)
     manufacturer = models.ForeignKey(Manufacturer, models.DO_NOTHING, blank=True, null=True)
     model = models.ForeignKey(Model, models.DO_NOTHING, blank=True, null=True)
     type_year = models.ForeignKey(TypeYear, models.DO_NOTHING, blank=True, null=True)
