@@ -54,8 +54,6 @@ class Type_YearAPI(APIView):
         # return Response(serializer.data)
 
 
-    
-
 class VehicleAPI(APIView):
     def get(self,request,format=None):
         manufacture_parameter = request.query_params.get('manufacturer_id', None)
@@ -111,7 +109,10 @@ class PartsAPI(APIView):
             subcategory_parameter = request.query_params.get('subcategory_id', None)
             engine_parameter = request.query_params.get('engine_id', None)
             if (subcategory_parameter is not None) and (engine_parameter is not None):
-                part = Parts.objects.filter(sub_category_id=subcategory_parameter,engine_power=engine_parameter)
+                try:
+                    part = Parts.objects.filter(sub_category_id=subcategory_parameter,engine_power_id__id=engine_parameter)
+                except Exception as E:
+                    return Response({'error':'part not found'})
                 serializer  = PartsSerializer(part,many=True)
                 return Response([{'id':v.get('id'),'name':v.get('part_name')} for v in serializer.data])
             if (subcategory_parameter is not None) and (engine_parameter == None):
@@ -119,7 +120,7 @@ class PartsAPI(APIView):
                 serializer  = PartsSerializer(part,many=True)
                 return Response([{'id':v.get('id'),'name':v.get('part_name')} for v in serializer.data])
             
-        except Exception as e:            
+        except Exception as e:         
             return Response({'error':'not found'})
     
 

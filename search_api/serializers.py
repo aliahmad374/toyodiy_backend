@@ -37,4 +37,4 @@ class ManufacturerSerializer(serializers.ModelSerializer):
 class PartsSerializer(serializers.ModelSerializer): 
     class Meta:
         model=Parts
-        fields = ['id','sub_category_id','engine_code','market','part_number','part_name','quantity_required','part_source','price','engine_power']
+        fields = ['id','sub_category_id','engine_code','market','part_number','part_name','quantity_required','part_source','price','engine_power_id']

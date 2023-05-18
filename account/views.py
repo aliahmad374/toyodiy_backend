@@ -31,7 +31,7 @@ class UserRegistrationView(APIView):
     def post(self,request,format=None):
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
-            user = serializer.save()
+            user = serializer.save()           
             try:            
                 send_verification_email(user.email)
             except Exception as E:

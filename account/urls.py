@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path,include
 from account import views
 
 
@@ -11,4 +11,6 @@ urlpatterns = [
     path('changepassword/',views.UserChangePassword.as_view(),name='changepassword'),
     path('send-reset-password-email/',views.SendPasswordResetEmailView.as_view(),name='send-reset-password-email'),
     path('reset-password/<uid>/<token>/',views.UserpasswordResetView.as_view(),name='reset-password'),
+    path('dashboard/',include('after_login.urls'))
+
 ]

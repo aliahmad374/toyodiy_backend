@@ -5,23 +5,35 @@ from django.utils.encoding import smart_str,force_bytes,DjangoUnicodeDecodeError
 from django.utils.http import urlsafe_base64_decode,urlsafe_base64_encode
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from account.utils import Util
+from django.contrib.auth.models import Group
+from django.db import models
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
-    # password2 = serializers.CharField(style={'input_type':'password'},write_only=True)
+    groups = serializers.SlugRelatedField(many=True, slug_field='name', queryset=Group.objects.all())
     class Meta:
         model = User
-        fields = ['email','first_name','last_name','address','phone','tc','is_verified','password']
+        fields = ['email','first_name','last_name','address','phone','tc','is_verified','password','groups']
         extra_kwargs = {
             'password':{'write_only':True}
         }
 
     def create(self, validated_data):
-        return User.objects.create_user(**validated_data)
+        groups_data = validated_data.pop('groups', [])  # Extract the groups data from validated_data
+        user = User.objects.create_user(**validated_data)
+        # Add the user to the specified groups
+        for group_name in groups_data:
+            try:
+                group = Group.objects.get(name=group_name)
+                user.groups.add(group)
+            except Group.DoesNotExist:
+                raise serializers.ValidationError(f"Group '{group_name}' does not exist.")
+        
+        return user
     
 class ReUserVerificationSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(max_length=255)
     class Meta:
-        model = User
+        model = User        
         fields = ['email']    
     
 
@@ -65,7 +77,7 @@ class SendPasswordResetEmailSerializer(serializers.Serializer):
                 user = User.objects.get(email=email)
                 uid= urlsafe_base64_encode(force_bytes(user.id))
                 token = PasswordResetTokenGenerator().make_token(user)
-                link = 'http://127.0.0.1:8000/user/reset/'+uid+'/'+token
+                link = 'http://127.0.0.1:8000/user/reset-password/'+uid+'/'+token+'/'
                 body = 'Click Following Link to reset Your Password'+link
                 data = {
                     'subject':"Reset Your Password",
