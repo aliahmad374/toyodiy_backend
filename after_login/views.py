@@ -9,6 +9,9 @@ from .models import UserVehicle
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from account.models import  User
 
+from search_api.models import Manufacturer,Model,TypeYear,VehicleEngine
+from search_api.serializers import ManufacturerSerializer,ModelSerializer,TypeYearSerializer,VehicleEngineSerializer
+
 # Create your views here.
 
 class UserVehicleView(APIView):
@@ -32,10 +35,30 @@ class UserVehicleView(APIView):
         user = UserVehicle.objects.filter(user=request.user.id)
         data = []
         for loop in user:
+            vehicle = VehicleEngine.objects.get(id=loop.model_id)
+            serializer  = VehicleEngineSerializer(vehicle)
             item = dict()
-            item['id'] = loop.id
-            item['model_id'] = loop.model_id
-            item['user_id'] = loop.user_id
+            manufacture_id_id =serializer.data['manufacturer_id']
+            man = Manufacturer.objects.get(id=manufacture_id_id)
+            serializer_man = ManufacturerSerializer(man)
+            manufacturer_id = serializer_man.data['make']
+            item['manufacturer_id'] = manufacturer_id
+            model_id_id =serializer.data['model_id']
+            mod = Model.objects.get(id=model_id_id)
+
+            serializer_mod = ModelSerializer(mod)
+            model_id = serializer_mod.data['model']
+            item['model_id'] = model_id
+            type_year_id_id =serializer.data['type_year_id']
+            typ = TypeYear.objects.get(id=type_year_id_id)
+
+            serializer_typ = TypeYearSerializer(typ)
+            type_year_id = serializer_typ.data['year']
+            item['type_year_id'] = type_year_id
+
+            engine_power_id = serializer.data['engine_power']
+            item['engine_power_id'] = engine_power_id
+            item['engine_id'] = loop.model_id
             data.append(item)
         return Response(data ,status=status.HTTP_200_OK)
     
@@ -53,4 +76,3 @@ class UserVehicleView(APIView):
 
             return Response({'msg':'vehicle remove sucessfully'} ,status=status.HTTP_200_OK)
         
-            
