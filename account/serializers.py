@@ -7,6 +7,14 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from account.utils import Util
 from django.contrib.auth.models import Group
 from django.db import models
+import random
+import string
+
+
+def generate_password(length=10):
+    characters = string.ascii_letters + string.digits
+    password = ''.join(random.choice(characters) for _ in range(length))
+    return password
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     groups = serializers.SlugRelatedField(many=True, slug_field='name', queryset=Group.objects.all())
@@ -75,18 +83,21 @@ class SendPasswordResetEmailSerializer(serializers.Serializer):
         if User.objects.filter(email=email).exists():
             if User.objects.get(email=email).is_verified==True:
                 user = User.objects.get(email=email)
-                uid= urlsafe_base64_encode(force_bytes(user.id))
-                token = PasswordResetTokenGenerator().make_token(user)
-                link = 'http://127.0.0.1:8000/user/reset-password/'+uid+'/'+token+'/'
-                body = 'Click Following Link to reset Your Password'+link
+                new_password = generate_password()
+                user.set_password(str(new_password)) 
+                user.save()
+                # uid= urlsafe_base64_encode(force_bytes(user.id))
+                # token = PasswordResetTokenGenerator().make_token(user)
+                # link = 'http://127.0.0.1:8000/user/reset-password/'+uid+'/'+token+'/'
+                # body = 'http://127.0.0.1:8000/user/reset-password/'+uid+'/'+token+'/'
+                # body = 'Click Following Link to reset Your Password'+link
                 data = {
                     'subject':"Reset Your Password",
-                    'body':body,
+                    'body':new_password,
                     'to_email':user.email
-
                 }
                 try:
-                    Util.send_email(data)
+                    Util.send_email(data,user.first_name,True)
                 except:
                     raise serializers.ValidationError('error in your smtp authentication')
 
