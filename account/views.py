@@ -16,6 +16,8 @@ from django.utils import timezone
 # Create your views here.
 from rest_framework import serializers
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from datetime import datetime as dt
+import pytz
 
 # Generate Token manually
 def get_tokens_for_user(user):
@@ -26,6 +28,26 @@ def get_tokens_for_user(user):
         'access': str(refresh.access_token),
     }
 
+def send_verification_email(email,name=None):
+    # Generate JWT token with a limited expiration time (60 minutes)
+    expires_at = expires_at = timezone.now() + datetime.timedelta(seconds=3600)
+    payload = {
+    'email': email,
+    'exp': expires_at.timestamp()
+    }
+    token = jwt.encode(payload, 'django-insecure-!&bo@8q95122$@tp3s)ed=xmmqp3))_!#max$@x8j%bj%e&(0p', algorithm='HS256')
+    link = f'http://127.0.0.1:8000/user/verify?token={token}'
+    # body = 'Click Following Link to reset Your Password'+link
+    body = link
+
+    data = {
+        'subject':"Account Verification",
+        'body':body,
+        'to_email':email
+
+    }
+    Util.send_email(data,name,None)
+
 class UserRegistrationView(APIView):
     renderer_classes = [UserRenderer]
     def post(self,request,format=None):
@@ -33,7 +55,7 @@ class UserRegistrationView(APIView):
         if serializer.is_valid(raise_exception=True):
             user = serializer.save()           
             try:            
-                send_verification_email(user.email)
+                send_verification_email(user.email,serializer.data['first_name'])
             except Exception as E:
                 Response({'msg':'error'+str(E)},status=status.HTTP_400_BAD_REQUEST)
 
@@ -48,8 +70,8 @@ class ReUserVerificationView(APIView):
             user = User.objects.get(email=serializer.data['email'])
             if user.is_verified==False:
                 try:
-                    send_verification_email(serializer.data['email'])
-                except:
+                    send_verification_email(serializer.data['email'],user.first_name)
+                except Exception as E:
                     Response({'msg':'error'+str(E)},status=status.HTTP_400_BAD_REQUEST)
 
                 return Response({'msg':'Email Verification Send'},status=status.HTTP_201_CREATED)
@@ -58,23 +80,7 @@ class ReUserVerificationView(APIView):
 
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)    
     
-def send_verification_email(email):
-    # Generate JWT token with a limited expiration time (60 minutes)
-    expires_at = expires_at = timezone.now() + datetime.timedelta(seconds=3600)
-    payload = {
-    'email': email,
-    'exp': expires_at.timestamp()
-}
-    token = jwt.encode(payload, 'django-insecure-!&bo@8q95122$@tp3s)ed=xmmqp3))_!#max$@x8j%bj%e&(0p', algorithm='HS256')
-    link = f'http://127.0.0.1:8000/user/verify?token={token}'
-    body = 'Click Following Link to reset Your Password'+link
-    data = {
-        'subject':"Account Verification",
-        'body':body,
-        'to_email':email
 
-    }
-    Util.send_email(data)
 
 
 class UserVerificationView(APIView):
@@ -113,19 +119,31 @@ class UserLoginView(APIView):
         serializer = UserLoginSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             email = serializer.data.get('email')
-            password = serializer.data.get('password')            
-            user = authenticate(email=email,password=password)
+            password = serializer.data.get('password') 
+            try:           
+                user = authenticate(email=email,password=password)
+                created_date = user.created_at
+            except:
+                return Response({'errors':{'msg':['user is not authenticated']}},status=status.HTTP_404_NOT_FOUND)
 
+            
+            
             if user is not None:
+
+                today_date = dt.now(pytz.utc)
+                difference = today_date - created_date
+                hours = difference.total_seconds() // 3600
                 try:
                     # user_verify = User.objects.get(email=email)
                     if user.is_verified==True:
                         token = get_tokens_for_user(user)
-                        return Response({'token':token,'msg':'Login Success'},status=status.HTTP_200_OK)
+                        return Response({'token':token,'msg':'Login Successfully'},status=status.HTTP_200_OK)
+                    elif user.is_verified==False and hours<1:
+                        return Response({'errors':{'msg':['please check your email to verify']}},status=status.HTTP_200_OK)
                     else:
-                        return Response({'errors':{'non_field_errors':['You are not Verified user']}},status=status.HTTP_404_NOT_FOUND)
+                        return Response({'errors':{'msg':['Reverify User']}},status=status.HTTP_200_OK)
                 except Exception as E:
-                    return Response({'errors':{'non_field_errors':['Error']}},status=status.HTTP_404_NOT_FOUND)
+                    return Response({'errors':{'msg':['Error']}},status=status.HTTP_404_NOT_FOUND)
                     
 
 
