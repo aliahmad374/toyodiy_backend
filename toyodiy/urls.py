@@ -20,5 +20,6 @@ from django.contrib import admin
 urlpatterns = [    
     path('admin/', admin.site.urls) ,
     path('search/',include('search_api.urls')),
-    path('user/',include('account.urls'))
+    path('user/',include('account.urls')),
+    path('techdoc/',include('techdoc_apis.urls'))
 ]

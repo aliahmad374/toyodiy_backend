@@ -16,11 +16,16 @@ class Util:
             with open('account\\email_static_files\\verify.html', 'r') as file:
                 html_content = file.read()
  
-            html_content = html_content.replace('Hey SmilesDavis',f'Hey {name}')
-            html_content = html_content.replace('href="#"',f'href="'+link+'"')
-            email.content_subtype = "html"
-            email.body = html_content
-            email.send()
+            print('i am email function')
+            try:
+                html_content = html_content.replace('Hey SmilesDavis',f'Hey {name}')
+                html_content = html_content.replace('href="#"',f'href="'+link+'"')
+                email.content_subtype = "html"
+                email.body = html_content
+                email.send()
+            except Exception as E:
+                print(E)
+
 
         if resetpassword == True:
             with open('account\\email_static_files\\verify.html', 'r') as file:
