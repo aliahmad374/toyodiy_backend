@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'search_api',
     'account',
     'after_login',
+    'techdoc_apis'
 ]
 
 MIDDLEWARE = [
@@ -92,7 +93,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME':  'toyodiy',
-        'USER': 'abdullah',
+        'USER': 'dbuser',
         'PASSWORD':'toyodiyroot',
         'HOST' : '192.3.255.167',
         'PORT': '3306'
@@ -167,7 +168,7 @@ AUTH_USER_MODEL = 'account.User'
 
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=20),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=40),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "AUTH_HEADER_TYPES": ("Bearer",),
     "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
