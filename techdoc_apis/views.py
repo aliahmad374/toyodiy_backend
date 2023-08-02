@@ -350,10 +350,7 @@ def find_articles_from_categories(request,*args,**kwargs):
         json_param = json.dumps(parameters)
         result = http_json_request(JSON_SERVICE_URL, json_param)
         generic_articleId = json.loads(result)["genericArticleFacets"]["counts"][0]["genericArticleId"]
-        print(generic_articleId)
-
-
-
+        
 
         parameters2 = {
             operation_name: {
@@ -420,8 +417,25 @@ def find_articles_from_categories(request,*args,**kwargs):
 
         json_param2 = json.dumps(parameters2)
         result2 = http_json_request(JSON_SERVICE_URL, json_param2)
-        
-        return Response(json.loads(result2))
+
+        macthed_oem_db = []
+        for article_list in json.loads(result2)['articles']:
+            try:
+                oem_number = article_list['oemNumbers'][0]['articleNumber']
+            except:
+                oem_number = None
+
+            if (oem_number!=None):            
+                search_database = Eztb3105.objects.filter(searchfield__icontains=oem_number)
+                search_database_serializer = Eztb3105Serializer(search_database,many=True)                
+                if len(search_database_serializer.data) > 0:
+                    new_data = search_database_serializer.data[0].copy()
+                    new_data['Quantity_article'] = int(new_data['loc01'])+int(new_data['loc02'])+int(new_data['loc03'])+int(new_data['loc04'])+int(new_data['loc05'])+int(new_data['loc06'])+int(new_data['loc07'])+int(new_data['loc08'])+int(new_data['loc09'])+int(new_data['loc10'])+int(new_data['loc11'])+int(new_data['loc12'])+int(new_data['loc13'])+int(new_data['loc14'])+int(new_data['loc15'])+int(new_data['loc16'])+int(new_data['loc17'])+int(new_data['loc18'])+int(new_data['loc19'])+int(new_data['loc20'])+int(new_data['loc31'])+int(new_data['loc32'])+int(new_data['loc33'])+int(new_data['loc34'])+int(new_data['loc35'])+int(new_data['loc36'])+int(new_data['loc37'])+int(new_data['loc38'])+int(new_data['loc39'])+int(new_data['loc40'])
+                    new_data['images'] = article_list['images']
+                    macthed_oem_db.append(new_data)
+
+        return Response(macthed_oem_db)
+
     return Response({'error':'linkageTarget assemblyGroupNodeIds id not found'})
 
 @api_view(['GET'])    
@@ -459,6 +473,8 @@ def find_article_information(request,*args,**kwargs):
         return Response({'error':'SearchQuery not found'})
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
 def AutoCompleteSuggestions(request,*args,**kwargs):
         searchQuery = request.GET.get('searchquery')
         if (searchQuery!=None):
@@ -524,7 +540,6 @@ def AutoCompleteSuggestions(request,*args,**kwargs):
             json_param = json.dumps(parameters)
             result = http_json_request('https://webservice.tecalliance.services/pegasus-3-0/services/TecdocToCatDLW.jsonEndpoint', json_param) 
 
-            # print(json.loads(result)["genericArticleFacets"])
             generic_articleId = json.loads(result)["genericArticleFacets"]["counts"][0]["genericArticleId"]
 
             parameters2 = {
@@ -591,21 +606,26 @@ def AutoCompleteSuggestions(request,*args,**kwargs):
             json_param2 = json.dumps(parameters2)
             result2 = http_json_request('https://webservice.tecalliance.services/pegasus-3-0/services/TecdocToCatDLW.jsonEndpoint', json_param2)
 
-            return Response(json.loads(result2))
+            macthed_oem_db = []
+            for article_list in json.loads(result2)['articles']:
+                try:
+                    oem_number = article_list['oemNumbers'][0]['articleNumber']
+                except:
+                    oem_number = None
 
+                if (oem_number!=None):            
+                    search_database = Eztb3105.objects.filter(searchfield__icontains=oem_number)
+                    search_database_serializer = Eztb3105Serializer(search_database,many=True)                
+                    if len(search_database_serializer.data) > 0:
+                        new_data = search_database_serializer.data[0].copy()
+                        new_data['Quantity_article'] = int(new_data['loc01'])+int(new_data['loc02'])+int(new_data['loc03'])+int(new_data['loc04'])+int(new_data['loc05'])+int(new_data['loc06'])+int(new_data['loc07'])+int(new_data['loc08'])+int(new_data['loc09'])+int(new_data['loc10'])+int(new_data['loc11'])+int(new_data['loc12'])+int(new_data['loc13'])+int(new_data['loc14'])+int(new_data['loc15'])+int(new_data['loc16'])+int(new_data['loc17'])+int(new_data['loc18'])+int(new_data['loc19'])+int(new_data['loc20'])+int(new_data['loc31'])+int(new_data['loc32'])+int(new_data['loc33'])+int(new_data['loc34'])+int(new_data['loc35'])+int(new_data['loc36'])+int(new_data['loc37'])+int(new_data['loc38'])+int(new_data['loc39'])+int(new_data['loc40'])
+                        new_data['images'] = article_list['images']
+                        macthed_oem_db.append(new_data)
+
+            return Response(macthed_oem_db)
 
         else:
             return Response({'error':'searchQuery not found'})
-@api_view(['GET'])      
-def OEM_FILTER_FROM_DATABASE(request,*args,**kwargs):
-    oemquery = request.GET.get('oemquery')    
-    if (oemquery!=None):            
-            search_database = Eztb3105.objects.filter(searchfield__icontains=oemquery)
-            search_database_serializer = Eztb3105Serializer(search_database,many=True)    
-
-            return Response(search_database_serializer.data)
-    else:
-        return Response({'error':'oemquery not found'})
 
 
 

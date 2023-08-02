@@ -12,7 +12,6 @@ urlpatterns = [
     path('find_articles/',views.find_articles_from_categories,name='article'),
     path('article_info/',views.find_article_information,name='article_info'),
     path('autoCompletesuggestions/',views.AutoCompleteSuggestions,name='autoCompletesuggestions'),
-    path('oempartsearch/',views.OEM_FILTER_FROM_DATABASE,name='oempartsearch'),
     
 
 ]
