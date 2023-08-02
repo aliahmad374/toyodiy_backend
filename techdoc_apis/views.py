@@ -7,6 +7,8 @@ from rest_framework.decorators import api_view
 from rest_framework.decorators import permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from .serializers import Eztb3105Serializer
+from .models import Eztb3105
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 # Create your views here.
@@ -29,9 +31,8 @@ def http_json_request(service_url, json_param):
     'sec-fetch-mode': 'cors',
     'sec-fetch-site': 'cross-site',
     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
-    'x-api-key': '2BeBXg6LNe9gMds4MBLduudVkbwBTb8ES5sPyiP13DG1rVSMJNHZ',
+    'x-api-key': '2BeBXg6LNe9gMds4MBLduudVkbwBTb8ES5sPyiP13DG1rVSMJNHZ',    
     }
-
     response = requests.post(service_url, data=json_param, headers=headers)
 
     # Read the response content
@@ -198,6 +199,12 @@ def find_categories_subcategories(request, *args, **kwargs):
 
             }
         }
+
+        print('===================categories -subcategories ===================')
+        print('parametrs = ',parameters)
+        print('operation name',operation_name)
+        print('URL',JSON_SERVICE_URL)
+
         
         # Serialize the dictionary as JSON
         json_param1 = json.dumps(parameters)
@@ -268,9 +275,6 @@ def find_subcategories_subcategories(request, *args, **kwargs):
     return Response({'error':'linkageTarget selected_subcategory id not found'})
 
 
-
-
-
     
 @api_view(['GET'])    
 @permission_classes([IsAuthenticated])
@@ -285,61 +289,139 @@ def find_articles_from_categories(request,*args,**kwargs):
     # # Using a dictionary to generate the request payload
         parameters = {
             operation_name: {
-                "articleCountry": "KE",
-                "assemblyGroupFacetOptions": {"enabled": True},
-                "dataSupplierIds": [],
-                "filterQueries": ["(dataSupplierId NOT IN (4978,4982))"],
-                "lang": "en",
-                "linkingTargetId": str(linkageTargetIds),
-                "linkingTargetType": "P",
-                "provider": TECDOC_MANDATOR,
-                'assemblyGroupNodeIds':str(assemblyGroupNodeIds),
-                'page': 1,
-                'perPage': 100,
-                'sort': [
-                    {
-                        'field': 'mfrName',
-                        'direction': 'asc',
-                    },
-                    {
-                        'field': 'linkageSortNum',
-                        'direction': 'asc',
-                    },
-                    {
-                        'field': 'score',
-                        'direction': 'desc',
-                    },
-                ],
-                'genericArticleIds': [],
-                'includeAll': False,
-                'includeLinkages': True,
-                'linkagesPerPage': 100,
-                'includeGenericArticles': True,
-                'includeArticleCriteria': True,
-                'includeMisc': True,
-                'includeImages': True,
-                'includePDFs': True,
-                'includeLinks': True,
-                'includeArticleText': True,
-                'includeOEMNumbers': True,
-                'includeReplacedByArticles': True,
-                'includeReplacesArticles': True,
-                'includeComparableNumbers': True,
-                'includeGTINs': True,
-                'includeTradeNumbers': True,
-                'includePrices': False,
-                'includePartsListArticles': False,
-                'includeAccessoryArticles': False,
-                'includeArticleLogisticsCriteria': True,
-                'includeDataSupplierFacets': True,
-                'includeGenericArticleFacets': True,
-                'includeCriteriaFacets': False,
-            }
+            'articleCountry': 'KE',
+            'provider': TECDOC_MANDATOR,
+            'lang': 'en',
+            'assemblyGroupNodeIds': [
+                int(assemblyGroupNodeIds),
+            ],
+            'linkageTargetId': int(linkageTargetIds),
+            'linkageTargetType': 'V',
+            'linkageTargetCountry': 'KE',
+            'page': 1,
+            'perPage': 0,
+            'sort': [
+                {
+                    'field': 'mfrName',
+                    'direction': 'asc',
+                },
+                {
+                    'field': 'linkageSortNum',
+                    'direction': 'asc',
+                },
+                {
+                    'field': 'score',
+                    'direction': 'desc',
+                },
+            ],
+            'filterQueries': [
+                '(dataSupplierId NOT IN (4978,4982))',
+            ],
+            'dataSupplierIds': [],
+            'genericArticleIds': [],
+            'includeAll': False,
+            'includeLinkages': True,
+            'linkagesPerPage': 100,
+            'includeGenericArticles': True,
+            'includeArticleCriteria': True,
+            'includeMisc': True,
+            'includeImages': True,
+            'includePDFs': False,
+            'includeLinks': False,
+            'includeArticleText': True,
+            'includeOEMNumbers': False,
+            'includeReplacedByArticles': True,
+            'includeReplacesArticles': True,
+            'includeComparableNumbers': True,
+            'includeGTINs': True,
+            'includeTradeNumbers': True,
+            'includePrices': False,
+            'includePartsListArticles': False,
+            'includeAccessoryArticles': False,
+            'includeArticleLogisticsCriteria': False,
+            'includeDataSupplierFacets': False,
+            'includeGenericArticleFacets': True,
+            'includeCriteriaFacets': False,
         }
+        }
+
+        print('=================== Article List ===================')
         
         json_param = json.dumps(parameters)
         result = http_json_request(JSON_SERVICE_URL, json_param)
-        return Response(json.loads(result))
+        generic_articleId = json.loads(result)["genericArticleFacets"]["counts"][0]["genericArticleId"]
+        print(generic_articleId)
+
+
+
+
+        parameters2 = {
+            operation_name: {
+            'articleCountry': 'KE',
+            'provider': TECDOC_MANDATOR,
+            'lang': 'en',
+            'assemblyGroupNodeIds': [
+                int(assemblyGroupNodeIds),
+            ],
+            'linkageTargetId': int(linkageTargetIds),
+            'linkageTargetType': 'V',
+            'linkageTargetCountry': 'KE',
+            'page': 1,
+            'perPage': 100,
+            'sort': [
+                {
+                    'field': 'mfrName',
+                    'direction': 'asc',
+                },
+                {
+                    'field': 'linkageSortNum',
+                    'direction': 'asc',
+                },
+                {
+                    'field': 'score',
+                    'direction': 'desc',
+                },
+            ],
+            'filterQueries': [
+                '(dataSupplierId NOT IN (4978,4982))',
+            ],
+            'dataSupplierIds': [],
+            'genericArticleIds': [
+                int(generic_articleId),
+            ],
+            'criteriaFilters': [],
+            'articleStatusIds': [],
+            'includeAll': False,
+            'includeLinkages': True,
+            'linkagesPerPage': 100,
+            'includeGenericArticles': True,
+            'includeArticleCriteria': True,
+            'includeMisc': True,
+            'includeImages': True,
+            'includePDFs': True,
+            'includeLinks': True,
+            'includeArticleText': True,
+            'includeOEMNumbers': True,
+            'includeReplacedByArticles': True,
+            'includeReplacesArticles': True,
+            'includeComparableNumbers': True,
+            'includeGTINs': True,
+            'includeTradeNumbers': True,
+            'includePrices': False,
+            'includePartsListArticles': False,
+            'includeAccessoryArticles': False,
+            'includeArticleLogisticsCriteria': True,
+            'includeDataSupplierFacets': True,
+            'includeGenericArticleFacets': True,
+            'includeArticleStatusFacets': True,
+            'includeCriteriaFacets': True,
+        }
+        }
+
+        json_param2 = json.dumps(parameters2)
+        result2 = http_json_request(JSON_SERVICE_URL, json_param2)
+        
+        return Response(json.loads(result2))
     return Response({'error':'linkageTarget assemblyGroupNodeIds id not found'})
 
 @api_view(['GET'])    
@@ -364,13 +446,168 @@ def find_article_information(request,*args,**kwargs):
             }
         }
         # # Serialize the dictionary as JSON
+        print('=================== Particular Article Information  ===================')
+        print('parametrs = ',parameters)
+        print('operation name',operation_name)
+        print('URL',JSON_SERVICE_URL)
         json_param = json.dumps(parameters)
         result = http_json_request(JSON_SERVICE_URL, json_param)  
         
         return Response(json.loads(result))
         
     else:
-        return Response({'error':'linkageTarget, supplierIds, searchQuery not found'})
+        return Response({'error':'SearchQuery not found'})
+
+@api_view(['GET'])
+def AutoCompleteSuggestions(request,*args,**kwargs):
+        searchQuery = request.GET.get('searchquery')
+        if (searchQuery!=None):
+            operation_name = "getArticles"
+
+            parameters = {
+                operation_name: {
+                    'arg0': {
+                        'articleCountry': 'KE',
+                        'provider': int(TECDOC_MANDATOR),
+                        'lang': 'en',
+                        'searchQuery': searchQuery,
+                        'searchMatchType': 'prefix_or_suffix',
+                        'searchType': 10,
+                        'page': 1,
+                        'perPage': 0,
+                        'sort': [
+                            {
+                                'field': 'score',
+                                'direction': 'desc',
+                            },
+                            {
+                                'field': 'mfrName',
+                                'direction': 'asc',
+                            },
+                            {
+                                'field': 'linkageSortNum',
+                                'direction': 'asc',
+                            },
+                        ],
+                        'filterQueries': [
+                            '(dataSupplierId NOT IN (4978,4982))',
+                        ],
+                        'dataSupplierIds': [],
+                        'genericArticleIds': [],
+                        'includeAll': False,
+                        'includeLinkages': True,
+                        'linkagesPerPage': 100,
+                        'includeGenericArticles': True,
+                        'includeArticleCriteria': True,
+                        'includeMisc': True,
+                        'includeImages': True,
+                        'includePDFs': False,
+                        'includeLinks': False,
+                        'includeArticleText': True,
+                        'includeOEMNumbers': False,
+                        'includeReplacedByArticles': True,
+                        'includeReplacesArticles': True,
+                        'includeComparableNumbers': True,
+                        'includeGTINs': True,
+                        'includeTradeNumbers': True,
+                        'includePrices': False,
+                        'includePartsListArticles': False,
+                        'includeAccessoryArticles': False,
+                        'includeArticleLogisticsCriteria': False,
+                        'includeDataSupplierFacets': False,
+                        'includeGenericArticleFacets': True,
+                        'includeCriteriaFacets': False,
+                    },
+                    },
+                    }
+
+            json_param = json.dumps(parameters)
+            result = http_json_request('https://webservice.tecalliance.services/pegasus-3-0/services/TecdocToCatDLW.jsonEndpoint', json_param) 
+
+            # print(json.loads(result)["genericArticleFacets"])
+            generic_articleId = json.loads(result)["genericArticleFacets"]["counts"][0]["genericArticleId"]
+
+            parameters2 = {
+                operation_name: {
+                    'arg0': {
+                        'articleCountry': 'KE',
+                        'provider': int(TECDOC_MANDATOR),
+                        'lang': 'en',
+                        'searchQuery': searchQuery,
+                        'searchMatchType': 'prefix_or_suffix',
+                        'searchType': 10,
+                        'page': 1,
+                        'perPage': 100,
+                        'sort': [
+                            {
+                                'field': 'score',
+                                'direction': 'desc',
+                            },
+                            {
+                                'field': 'mfrName',
+                                'direction': 'asc',
+                            },
+                            {
+                                'field': 'linkageSortNum',
+                                'direction': 'asc',
+                            },
+                        ],
+                        'filterQueries': [
+                            '(dataSupplierId NOT IN (4978,4982))',
+                        ],
+                        'dataSupplierIds': [],
+                        'genericArticleIds': [
+                            generic_articleId,
+                        ],
+                        'criteriaFilters': [],
+                        'articleStatusIds': [],
+                        'includeAll': False,
+                        'includeLinkages': True,
+                        'linkagesPerPage': 100,
+                        'includeGenericArticles': True,
+                        'includeArticleCriteria': True,
+                        'includeMisc': True,
+                        'includeImages': True,
+                        'includePDFs': True,
+                        'includeLinks': True,
+                        'includeArticleText': True,
+                        'includeOEMNumbers': True,
+                        'includeReplacedByArticles': True,
+                        'includeReplacesArticles': True,
+                        'includeComparableNumbers': True,
+                        'includeGTINs': True,
+                        'includeTradeNumbers': True,
+                        'includePrices': False,
+                        'includePartsListArticles': False,
+                        'includeAccessoryArticles': False,
+                        'includeArticleLogisticsCriteria': True,
+                        'includeDataSupplierFacets': True,
+                        'includeGenericArticleFacets': True,
+                        'includeArticleStatusFacets': True,
+                        'includeCriteriaFacets': True,
+                    },
+                    },
+                    }
+            json_param2 = json.dumps(parameters2)
+            result2 = http_json_request('https://webservice.tecalliance.services/pegasus-3-0/services/TecdocToCatDLW.jsonEndpoint', json_param2)
+
+            return Response(json.loads(result2))
+
+
+        else:
+            return Response({'error':'searchQuery not found'})
+@api_view(['GET'])      
+def OEM_FILTER_FROM_DATABASE(request,*args,**kwargs):
+    oemquery = request.GET.get('oemquery')    
+    if (oemquery!=None):            
+            search_database = Eztb3105.objects.filter(searchfield__icontains=oemquery)
+            search_database_serializer = Eztb3105Serializer(search_database,many=True)    
+
+            return Response(search_database_serializer.data)
+    else:
+        return Response({'error':'oemquery not found'})
+
+
 
 
 

@@ -110,7 +110,7 @@ class SendPasswordResetEmailSerializer(serializers.Serializer):
         
 
 class UserpasswordResetSerializer(serializers.Serializer):
-    password = serializers.CharField(max_length=255,style={'inpuy_type':'password'},write_only=True)  
+    password = serializers.CharField(max_length=255,style={'input_type':'password'},write_only=True)  
     class Meta:
         fields = ['password']
 

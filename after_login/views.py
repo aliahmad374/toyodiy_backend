@@ -47,10 +47,15 @@ class UserVehicleView(APIView):
         user = UserVehicle.objects.filter(user=request.user.id)
         se = UserVehicleSerializer(user,many=True)
         all_vehicle = []
+        authorization_header = f"{request.META.get('HTTP_AUTHORIZATION')}"
+
+        headers = {
+            'Authorization':authorization_header
+        }
         for loop in se.data:
             print(loop['model_id'])
             url= f"http://127.0.0.1:8000/techdoc/sidebar/?linkageTargetIds="+str(int(loop['model_id']))
-            all_vehicle.append(json.loads(requests.get(url=url).text))
+            all_vehicle.append(json.loads(requests.get(url=url,headers=headers).text))
 
         return Response({'msg':all_vehicle} ,status=status.HTTP_200_OK)
     
