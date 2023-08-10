@@ -419,20 +419,25 @@ def find_articles_from_categories(request,*args,**kwargs):
         result2 = http_json_request(JSON_SERVICE_URL, json_param2)
 
         macthed_oem_db = []
+        already_done = []
         for article_list in json.loads(result2)['articles']:
             try:
-                oem_number = article_list['oemNumbers'][0]['articleNumber']
+                if article_list['oemNumbers'][0]['articleNumber'] not in already_done:
+                    oem_number = article_list['oemNumbers'][0]['articleNumber']
+                    already_done.append(oem_number)
+                    if (oem_number!=None):            
+                        search_database = Eztb3105.objects.filter(searchfield__icontains=oem_number)
+                        search_database_serializer = Eztb3105Serializer(search_database,many=True)                
+                        if len(search_database_serializer.data) > 0:
+                            for new_loop in search_database_serializer.data:
+                                new_data = new_loop.copy()
+                                new_data['Quantity_article'] = int(new_data['loc01'])+int(new_data['loc02'])+int(new_data['loc03'])+int(new_data['loc04'])+int(new_data['loc05'])+int(new_data['loc06'])+int(new_data['loc07'])+int(new_data['loc08'])+int(new_data['loc09'])+int(new_data['loc10'])+int(new_data['loc11'])+int(new_data['loc12'])+int(new_data['loc13'])+int(new_data['loc14'])+int(new_data['loc15'])+int(new_data['loc16'])+int(new_data['loc17'])+int(new_data['loc18'])+int(new_data['loc19'])+int(new_data['loc20'])+int(new_data['loc31'])+int(new_data['loc32'])+int(new_data['loc33'])+int(new_data['loc34'])+int(new_data['loc35'])+int(new_data['loc36'])+int(new_data['loc37'])+int(new_data['loc38'])+int(new_data['loc39'])+int(new_data['loc40'])
+                                new_data['images'] = article_list['images']
+                                macthed_oem_db.append(new_data)
             except:
                 oem_number = None
 
-            if (oem_number!=None):            
-                search_database = Eztb3105.objects.filter(searchfield__icontains=oem_number)
-                search_database_serializer = Eztb3105Serializer(search_database,many=True)                
-                if len(search_database_serializer.data) > 0:
-                    new_data = search_database_serializer.data[0].copy()
-                    new_data['Quantity_article'] = int(new_data['loc01'])+int(new_data['loc02'])+int(new_data['loc03'])+int(new_data['loc04'])+int(new_data['loc05'])+int(new_data['loc06'])+int(new_data['loc07'])+int(new_data['loc08'])+int(new_data['loc09'])+int(new_data['loc10'])+int(new_data['loc11'])+int(new_data['loc12'])+int(new_data['loc13'])+int(new_data['loc14'])+int(new_data['loc15'])+int(new_data['loc16'])+int(new_data['loc17'])+int(new_data['loc18'])+int(new_data['loc19'])+int(new_data['loc20'])+int(new_data['loc31'])+int(new_data['loc32'])+int(new_data['loc33'])+int(new_data['loc34'])+int(new_data['loc35'])+int(new_data['loc36'])+int(new_data['loc37'])+int(new_data['loc38'])+int(new_data['loc39'])+int(new_data['loc40'])
-                    new_data['images'] = article_list['images']
-                    macthed_oem_db.append(new_data)
+            
 
         return Response(macthed_oem_db)
 
@@ -607,20 +612,25 @@ def AutoCompleteSuggestions(request,*args,**kwargs):
             result2 = http_json_request('https://webservice.tecalliance.services/pegasus-3-0/services/TecdocToCatDLW.jsonEndpoint', json_param2)
 
             macthed_oem_db = []
+            already_done = []
             for article_list in json.loads(result2)['articles']:
                 try:
-                    oem_number = article_list['oemNumbers'][0]['articleNumber']
+                    if article_list['oemNumbers'][0]['articleNumber'] not in already_done:
+                        oem_number = article_list['oemNumbers'][0]['articleNumber']
+                        already_done.append(oem_number)
+                        if (oem_number!=None):            
+                            search_database = Eztb3105.objects.filter(searchfield__icontains=oem_number)
+                            search_database_serializer = Eztb3105Serializer(search_database,many=True)                
+                            if len(search_database_serializer.data) > 0:
+                                for new_loop in search_database_serializer.data:
+                                    new_data = new_loop.copy()
+                                    new_data['Quantity_article'] = int(new_data['loc01'])+int(new_data['loc02'])+int(new_data['loc03'])+int(new_data['loc04'])+int(new_data['loc05'])+int(new_data['loc06'])+int(new_data['loc07'])+int(new_data['loc08'])+int(new_data['loc09'])+int(new_data['loc10'])+int(new_data['loc11'])+int(new_data['loc12'])+int(new_data['loc13'])+int(new_data['loc14'])+int(new_data['loc15'])+int(new_data['loc16'])+int(new_data['loc17'])+int(new_data['loc18'])+int(new_data['loc19'])+int(new_data['loc20'])+int(new_data['loc31'])+int(new_data['loc32'])+int(new_data['loc33'])+int(new_data['loc34'])+int(new_data['loc35'])+int(new_data['loc36'])+int(new_data['loc37'])+int(new_data['loc38'])+int(new_data['loc39'])+int(new_data['loc40'])
+                                    new_data['images'] = article_list['images']
+                                    macthed_oem_db.append(new_data)
                 except:
                     oem_number = None
 
-                if (oem_number!=None):            
-                    search_database = Eztb3105.objects.filter(searchfield__icontains=oem_number)
-                    search_database_serializer = Eztb3105Serializer(search_database,many=True)                
-                    if len(search_database_serializer.data) > 0:
-                        new_data = search_database_serializer.data[0].copy()
-                        new_data['Quantity_article'] = int(new_data['loc01'])+int(new_data['loc02'])+int(new_data['loc03'])+int(new_data['loc04'])+int(new_data['loc05'])+int(new_data['loc06'])+int(new_data['loc07'])+int(new_data['loc08'])+int(new_data['loc09'])+int(new_data['loc10'])+int(new_data['loc11'])+int(new_data['loc12'])+int(new_data['loc13'])+int(new_data['loc14'])+int(new_data['loc15'])+int(new_data['loc16'])+int(new_data['loc17'])+int(new_data['loc18'])+int(new_data['loc19'])+int(new_data['loc20'])+int(new_data['loc31'])+int(new_data['loc32'])+int(new_data['loc33'])+int(new_data['loc34'])+int(new_data['loc35'])+int(new_data['loc36'])+int(new_data['loc37'])+int(new_data['loc38'])+int(new_data['loc39'])+int(new_data['loc40'])
-                        new_data['images'] = article_list['images']
-                        macthed_oem_db.append(new_data)
+                        
 
             return Response(macthed_oem_db)
 
@@ -629,12 +639,115 @@ def AutoCompleteSuggestions(request,*args,**kwargs):
 
 
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+def SearchByVINNumber(request,*args,**kwargs):
+    vinnumber = request.GET.get('vinnumber')
+    if vinnumber !=None:
+        operation_name = "getVehiclesByVIN"
+        parameters = {
+        operation_name: {
+            'arg0': {
+                'country': 'KE',
+                'lang': 'en',
+                'vin': vinnumber,
+                'provider': TECDOC_MANDATOR,
+                'manuId': None,
+                'modelId': None,
+                'maxVehiclesToReturn': -1,
+            },
+        },
+        }
+        json_param = json.dumps(parameters)
+        result = http_json_request('https://webservice.tecalliance.services/pegasus-3-0/services/TecdocToCatDLW.jsonEndpoint', json_param)
+        return Response({'data':json.loads(result)})
+    return Response({'error':'vinnumber not found'})
 
 
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+def  allpartCategories(request,*args,**kwargs):
+     operation_name = "getArticles"
+    # Using a dictionary to generate the request payload
+     parameters = {
+            operation_name: {
+                "articleCountry": "KE",
+                "assemblyGroupFacetOptions": {"enabled": True,"assemblyGroupType": "P","includeCompleteTree": True},
+                "dataSupplierIds": [],
+                "filterQueries": ["(dataSupplierId NOT IN (4978,4982))"],
+                "includeDataSupplierFacets": True,
+                "includeGenericArticleFacets":True,
+                "lang": "en",
+                "provider": TECDOC_MANDATOR,
+                "perPage": 0,
+            }
+        }
 
+    # Serialize the dictionary as JSON
+     json_param1 = json.dumps(parameters)
+    
+     # Perform a JSON-Web request
+     result = http_json_request(JSON_SERVICE_URL, json_param1)
+     only_categories = []
+     for loop in json.loads(result)['assemblyGroupFacets']['counts']:
+        try:
+            parent_node = loop['parentNodeId']
+        except:
+            only_categories.append(loop)
+     for loop_only_cat in only_categories:
+        loop_only_cat['children'] = []
+        for loop1 in json.loads(result)['assemblyGroupFacets']['counts']:
+            try:
+                if loop1['parentNodeId'] == loop_only_cat['assemblyGroupNodeId']:
+                    loop_only_cat['children'].append(loop1)
+                    pass
+            except:
+                pass
+     return Response({'data':only_categories})
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+def allpartSubCategories(request,*args,**kwargs):
+    selected_subcategory = request.GET.get('selected_subcategory')
+    if (selected_subcategory!=None):
+        # selected_subcategory = 101340
+        operation_name = "getArticles"
 
+        # Using a dictionary to generate the request payload
+        parameters = {
+            operation_name: {
+                "articleCountry": "KE",
+                "assemblyGroupFacetOptions": {"enabled": True,"assemblyGroupType": "P","includeCompleteTree": True},
+                "dataSupplierIds": [],
+                "filterQueries": ["(dataSupplierId NOT IN (4978,4982))"],
+                "includeDataSupplierFacets": True,
+                "includeGenericArticleFacets":True,
+                "lang": "en",
+                "provider": TECDOC_MANDATOR,
+                "perPage": 0,
+
+            }
+        }
+
+        # Serialize the dictionary as JSON
+        json_param1 = json.dumps(parameters)
+
+        # Perform a JSON-Web request
+        result = http_json_request(JSON_SERVICE_URL, json_param1)
+        child_sub = []
+        for loo3 in json.loads(result)['assemblyGroupFacets']['counts']:
+            try:
+                if loo3['parentNodeId'] == int(selected_subcategory):
+                    child_sub.append(loo3)
+            except:
+                pass
+        return Response(child_sub)
+    return Response({'error':'linkageTarget selected_subcategory id not found'}) 
+    
 
 
 
