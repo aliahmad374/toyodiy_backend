@@ -12,6 +12,9 @@ urlpatterns = [
     path('find_articles/',views.find_articles_from_categories,name='article'),
     path('article_info/',views.find_article_information,name='article_info'),
     path('autoCompletesuggestions/',views.AutoCompleteSuggestions,name='autoCompletesuggestions'),
+    path('vinumber/',views.SearchByVINNumber,name='vinumber'),
+    path('allparts/',views.allpartCategories,name='allparts'),
+    path('allpartssubcategories/',views.allpartSubCategories,name='allpartssubcategories'),
     
 
 ]
