@@ -13,8 +13,12 @@ urlpatterns = [
     path('article_info/',views.find_article_information,name='article_info'),
     path('autoCompletesuggestions/',views.AutoCompleteSuggestions,name='autoCompletesuggestions'),
     path('vinumber/',views.SearchByVINNumber,name='vinumber'),
+    # for popular categories
     path('allparts/',views.allpartCategories,name='allparts'),
     path('allpartssubcategories/',views.allpartSubCategories,name='allpartssubcategories'),
-    
 
+    #epc-data for vim number
+    path('framenumber/',views.searchbyframenumber,name='framenumber'),
+
+    
 ]
