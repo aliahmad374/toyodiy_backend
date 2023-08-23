@@ -21,5 +21,6 @@ urlpatterns = [
     path('admin/', admin.site.urls) ,
     path('search/',include('search_api.urls')),
     path('user/',include('account.urls')),
-    path('techdoc/',include('techdoc_apis.urls'))
+    path('techdoc/',include('techdoc_apis.urls')),
+    path('checkout/',include('cartorder.urls'))
 ]
