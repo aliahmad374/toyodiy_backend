@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'search_api',
     'account',
     'after_login',
-    'techdoc_apis'
+    'techdoc_apis',
+    'cartorder'
 ]
 
 MIDDLEWARE = [
