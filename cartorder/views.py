@@ -83,8 +83,8 @@ class SearchOrderView(APIView):
                 product_serializer = CartProductSerializer(search_product,many=True)
                 del order_data['id']
                 del order_data['email']
-                del order_data['payment_type']             
-                product_data_list = [{k: v for k, v in item.items() if k not in ['id','order_id']} for item in product_serializer.data]                   
+                del order_data['payment_type']           
+                product_data_list = [{k: v for k, v in item.items() if k not in ['id','order_id','product_id']} for item in product_serializer.data]                   
                 order_data['products'] = product_data_list
                 
                 return Response({'success':order_data},status=status.HTTP_200_OK)
@@ -92,8 +92,7 @@ class SearchOrderView(APIView):
                 return Response({'error':'something went wrong'},status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({'success':'order id cannot be None'},status=status.HTTP_400_BAD_REQUEST)    
-            
-        
+
 
 class ChangeOrderStatusView(APIView):    
     renderer_classes = [UserRenderer]
@@ -143,3 +142,19 @@ class ChangeOrderStatusView(APIView):
                 return Response({'error':'something went wrong'},status=status.HTTP_400_BAD_REQUEST)    
         else:
             return Response({'error':'order id and status cannot be None'},status=status.HTTP_200_OK)
+
+class MyOrdersView(APIView):
+    renderer_classes = [UserRenderer]
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    def get(self,request,format=None):
+        try:
+            all_my_orders = CartOrder.objects.filter(email=request.user.email)
+            all_my_orders_Serializer = CartOrderSerializer(all_my_orders,many=True)
+            order_data = [dict(item) for item in all_my_orders_Serializer.data]
+            return Response({'success':order_data})
+        except Exception as E:
+            print(E)
+            return Response({'error':'something went wrong'},status=status.HTTP_400_BAD_REQUEST)
+
