@@ -1067,7 +1067,7 @@ def searchbyframenumber(request,*args,**kwargs):
             result = http_json_request(JSON_SERVICE_URL, json_param)
             result_dict = json.loads(result)
 
-
+            # print( "1070", result)
             match_name = ""
             for v in result_dict['vehicleModelSeriesFacets']['counts']:
                 if model_name.lower() in v['name'].lower():
@@ -1116,13 +1116,7 @@ def searchbyframenumber(request,*args,**kwargs):
                             if inner_engine['code'].replace('-',"") in model_scraper_engine:
                                 return Response({"result":enginess})
 
-
-
-
-
-
-                    # return Response({"model_id":match_name})
-            except Exception as E:        
+            except Exception as E:
                 return Response({"result":'no match'})
 
 
