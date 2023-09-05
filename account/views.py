@@ -81,8 +81,6 @@ class ReUserVerificationView(APIView):
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)    
     
 
-
-
 class UserVerificationView(APIView):
     def get(self, request):
         token = request.GET.get('token')
@@ -157,7 +155,10 @@ class UserProfileView(APIView):
     authentication_classes = [JWTAuthentication]
     def get(self,request,format=None):
         serializer = UserProfileSerializer(request.user)
-        return Response(serializer.data,status=status.HTTP_200_OK)
+        new_item = serializer.data
+        new_item.pop('id', None)
+        new_item.pop('email', None)
+        return Response(new_item,status=status.HTTP_200_OK)
     
 
 class UserChangePassword(APIView):
@@ -190,9 +191,21 @@ class UserpasswordResetView(APIView):
             return Response({'msg':'Password Reset Successfully'})
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST) 
             
-        
+
+class isAdminUser(APIView):
+    renderer_classes =[UserRenderer]
+    def post(self,request,format=None):        
+        email = request.data.get('email')
+        if email != None:
+            user = User.objects.get(email=email)
+            if user.is_admin == True:
+                return Response({'success':True},status=status.HTTP_200_OK)
+            else:
+                return Response({'success':False},status=status.HTTP_200_OK)
+
+        return Response({'error':'required parameter is missing'},status=status.HTTP_400_BAD_REQUEST) 
+            
 
 
-
-
+    
         
