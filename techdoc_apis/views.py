@@ -191,7 +191,7 @@ def find_sidebar(request, *args, **kwargs):
 def find_categories_subcategories(request, *args, **kwargs):
     try:
         linkageTargetIds = request.GET.get('linkageTargetIds')
-        print(linkageTargetIds)
+        
         if linkageTargetIds !=None:
 
 
@@ -216,10 +216,7 @@ def find_categories_subcategories(request, *args, **kwargs):
                 }
             }
 
-            print('===================categories -subcategories ===================')
-            print('parametrs = ',parameters)
-            print('operation name',operation_name)
-            print('URL',JSON_SERVICE_URL)
+            
 
             
             # Serialize the dictionary as JSON
@@ -367,13 +364,15 @@ def find_articles_from_categories(request,*args,**kwargs):
             }
             }
 
-            print('=================== Article List ===================')
             
-            json_param = json.dumps(parameters)
-            result = http_json_request(JSON_SERVICE_URL, json_param)
-            generic_articleId = json.loads(result)["genericArticleFacets"]["counts"][0]["genericArticleId"]
+            try:
+                json_param = json.dumps(parameters)
+                result = http_json_request(JSON_SERVICE_URL, json_param)
+                generic_articleId = json.loads(result)["genericArticleFacets"]["counts"][0]["genericArticleId"]
+            except:
+                return Response([])                
             
-
+            
             parameters2 = {
                 operation_name: {
                 'articleCountry': 'KE',
@@ -440,26 +439,45 @@ def find_articles_from_categories(request,*args,**kwargs):
             json_param2 = json.dumps(parameters2)
             result2 = http_json_request(JSON_SERVICE_URL, json_param2)
 
-            print(result2)
+
             macthed_oem_db = []
             already_done = []
             filter_done = []
-            for article_list in json.loads(result2)['articles']:
+            oem_flag =False
+
+            for article_list in json.loads(result2)['articles']:                
                 try:
                     if article_list['oemNumbers'][0]['articleNumber'] not in already_done:
-                        oem_number = article_list['oemNumbers'][0]['articleNumber']
-                        already_done.append(oem_number)
-                        if (oem_number!=None):            
-                            search_database = Eztb3105.objects.filter(searchfield__icontains=oem_number)
-                            search_database_serializer = Eztb3105Serializer(search_database,many=True)                
-                            if len(search_database_serializer.data) > 0:
-                                for new_loop in search_database_serializer.data:
-                                    new_data = new_loop.copy()
-                                    new_data['Quantity_article'] = int(new_data['loc01'])+int(new_data['loc02'])+int(new_data['loc03'])+int(new_data['loc04'])+int(new_data['loc05'])+int(new_data['loc06'])+int(new_data['loc07'])+int(new_data['loc08'])+int(new_data['loc09'])+int(new_data['loc10'])+int(new_data['loc11'])+int(new_data['loc12'])+int(new_data['loc13'])+int(new_data['loc14'])+int(new_data['loc15'])+int(new_data['loc16'])+int(new_data['loc17'])+int(new_data['loc18'])+int(new_data['loc19'])+int(new_data['loc20'])+int(new_data['loc31'])+int(new_data['loc32'])+int(new_data['loc33'])+int(new_data['loc34'])+int(new_data['loc35'])+int(new_data['loc36'])+int(new_data['loc37'])+int(new_data['loc38'])+int(new_data['loc39'])+int(new_data['loc40'])
-                                    new_data['images'] = article_list['images']                                    
-                                    if new_data['id'] not in filter_done:                                        
-                                        macthed_oem_db.append(new_data)
-                                        filter_done.append(new_data['id'])
+                        for oem_loop in  article_list['oemNumbers']:                                                        
+                            oem_number = oem_loop['articleNumber']                           
+                            already_done.append(oem_number)  
+                                                     
+                            if (oem_number!=None):
+                                # search_database = Eztb3105.objects.filter(searchfield__icontains=oem_number)
+                                search_database = Eztb3105.objects.filter(ref2=oem_number)
+                                search_database_serializer = Eztb3105Serializer(search_database,many=True)
+                                
+
+                                if len(search_database_serializer.data) > 0:
+                                    
+                                    oem_flag =True
+                                    
+                                    find_unique_id = search_database_serializer.data[0].get('uniqueid')
+                                    
+                                    search_database1 = Eztb3105.objects.filter(uniqueid=find_unique_id)
+                                    search_database_serializer1 = Eztb3105Serializer(search_database1,many=True)
+
+                                    for new_loop in search_database_serializer1.data:
+                                        new_data = new_loop.copy()
+                                        new_data['Quantity_article'] = int(new_data['loc01'])+int(new_data['loc02'])+int(new_data['loc03'])+int(new_data['loc04'])+int(new_data['loc05'])+int(new_data['loc06'])+int(new_data['loc07'])+int(new_data['loc08'])+int(new_data['loc09'])+int(new_data['loc10'])+int(new_data['loc11'])+int(new_data['loc12'])+int(new_data['loc13'])+int(new_data['loc14'])+int(new_data['loc15'])+int(new_data['loc16'])+int(new_data['loc17'])+int(new_data['loc18'])+int(new_data['loc19'])+int(new_data['loc20'])+int(new_data['loc31'])+int(new_data['loc32'])+int(new_data['loc33'])+int(new_data['loc34'])+int(new_data['loc35'])+int(new_data['loc36'])+int(new_data['loc37'])+int(new_data['loc38'])+int(new_data['loc39'])+int(new_data['loc40'])
+                                        new_data['images'] = article_list['images']                                    
+                                        if new_data['id'] not in filter_done:                                        
+                                            macthed_oem_db.append(new_data)
+                                            filter_done.append(new_data['id'])
+                            if oem_flag == True:
+                                break
+                        if oem_flag == True:
+                                break            
                 except:
                     oem_number = None
 
@@ -494,10 +512,7 @@ def find_article_information(request,*args,**kwargs):
                 }
             }
             # # Serialize the dictionary as JSON
-            print('=================== Particular Article Information  ===================')
-            print('parametrs = ',parameters)
-            print('operation name',operation_name)
-            print('URL',JSON_SERVICE_URL)
+
             json_param = json.dumps(parameters)
             result = http_json_request(JSON_SERVICE_URL, json_param)  
             
@@ -576,7 +591,7 @@ def AutoCompleteSuggestions(request,*args,**kwargs):
 
                 json_param = json.dumps(parameters)
                 result = http_json_request('https://webservice.tecalliance.services/pegasus-3-0/services/TecdocToCatDLW.jsonEndpoint', json_param)
-                print(result)
+
 
                 generic_articleId = json.loads(result)["genericArticleFacets"]["counts"][0]["genericArticleId"]
 
@@ -1016,7 +1031,7 @@ def searchbyframenumber(request,*args,**kwargs):
             model_name = scarper_response['header_list'][2]
             model_code = scarper_response['header_list'][3]
             model_scraper_engine = scarper_response['Engine']
-            print(full_description)
+
 
             # find_manufactures_ids
             operation_name = "getManufacturers2"
@@ -1067,7 +1082,7 @@ def searchbyframenumber(request,*args,**kwargs):
             result = http_json_request(JSON_SERVICE_URL, json_param)
             result_dict = json.loads(result)
 
-            # print( "1070", result)
+            
             match_name = ""
             for v in result_dict['vehicleModelSeriesFacets']['counts']:
                 if model_name.lower() in v['name'].lower():

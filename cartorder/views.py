@@ -84,7 +84,7 @@ class SearchOrderView(APIView):
                 del order_data['id']
                 del order_data['email']
                 del order_data['payment_type']           
-                product_data_list = [{k: v for k, v in item.items() if k not in ['id','order_id','product_id']} for item in product_serializer.data]                   
+                product_data_list = [{k: v for k, v in item.items() if k not in ['id','order_id']} for item in product_serializer.data]                   
                 order_data['products'] = product_data_list
                 
                 return Response({'success':order_data},status=status.HTTP_200_OK)
