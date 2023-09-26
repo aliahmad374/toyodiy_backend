@@ -55,7 +55,11 @@ class UserVehicleView(APIView):
         for loop in se.data:
             print(loop['model_id'])
             url= f"http://127.0.0.1:8000/techdoc/sidebar/?linkageTargetIds="+str(int(loop['model_id']))
-            all_vehicle.append(json.loads(requests.get(url=url,headers=headers).text))
+            try:
+                all_vehicle.append(json.loads(requests.get(url=url,headers=headers).text))
+            except Exception as E:
+                print(E)
+
 
         return Response({'msg':all_vehicle} ,status=status.HTTP_200_OK)
     
