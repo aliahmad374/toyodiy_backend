@@ -55,7 +55,7 @@ def find_manufactures(request, *args, **kwargs):
                 "countryGroupFlag":False,
                 "favouredList":2,
                 "provider": TECDOC_MANDATOR,
-                "linkingTargetType": "P"
+                "linkingTargetType": "V"
             }
         }
         
@@ -89,7 +89,7 @@ def find_model(request, *args, **kwargs):
                 "linkageTargetCountryGroupFlag": False,
                 "favouredList": 2,
                 "provider": TECDOC_MANDATOR,
-                "linkageTargetType": "P",
+                "linkageTargetType": "V",
                 "perPage":1,
                 "mfrIds":[mfid]  # manufatcure id variable
             }
@@ -126,7 +126,7 @@ def find_type(request, *args, **kwargs):
                     "lang": "en",
                     "linkageTargetCountryGroupFlag": False,
                     "provider": TECDOC_MANDATOR,
-                    "linkageTargetType": "P",
+                    "linkageTargetType": "V",
                     "page":1,
                     "perPage": 100,
                     "mfrIds": [mfid],  # manufatcure id variable
@@ -169,7 +169,7 @@ def find_sidebar(request, *args, **kwargs):
                     "provider": TECDOC_MANDATOR,
                     "page": 1,
                     "perPage": 100,
-                    "linkageTargetIds":{"type": "P", "id": linkageTargetIds}  #3822 is  Type Id
+                    "linkageTargetIds":{"type": "V", "id": linkageTargetIds}  #3822 is  Type Id
 
                 }
             }
@@ -208,7 +208,7 @@ def find_categories_subcategories(request, *args, **kwargs):
                     "includeGenericArticleFacets":True,
                     "lang": "en",
                     "linkageTargetId":linkageTargetIds,
-                    "linkageTargetType":"P",
+                    "linkageTargetType":"V",
                     "provider": TECDOC_MANDATOR,
                     "perPage": 0,
 
@@ -268,7 +268,7 @@ def find_subcategories_subcategories(request, *args, **kwargs):
                     "includeGenericArticleFacets":True,
                     "lang": "en",
                     "linkageTargetId":linkageTargetIds,
-                    "linkageTargetType":"P",
+                    "linkageTargetType":"V",
                     "provider": TECDOC_MANDATOR,
                     "perPage": 0,
 
@@ -306,71 +306,71 @@ def find_articles_from_categories(request,*args,**kwargs):
             operation_name = "getArticles"
         #
         # # Using a dictionary to generate the request payload
-            parameters = {
-                operation_name: {
-                'articleCountry': 'KE',
-                'provider': TECDOC_MANDATOR,
-                'lang': 'en',
-                'assemblyGroupNodeIds': [
-                    int(assemblyGroupNodeIds),
-                ],
-                'linkageTargetId': int(linkageTargetIds),
-                'linkageTargetType': 'V',
-                'linkageTargetCountry': 'KE',
-                'page': 1,
-                'perPage': 100,
-                'sort': [
-                    {
-                        'field': 'mfrName',
-                        'direction': 'asc',
-                    },
-                    {
-                        'field': 'linkageSortNum',
-                        'direction': 'asc',
-                    },
-                    {
-                        'field': 'score',
-                        'direction': 'desc',
-                    },
-                ],
-                'filterQueries': [
-                    '(dataSupplierId NOT IN (4978,4982))',
-                ],
-                'dataSupplierIds': [],
-                'genericArticleIds': [],
-                'includeAll': False,
-                'includeLinkages': True,
-                'linkagesPerPage': 100,
-                'includeGenericArticles': True,
-                'includeArticleCriteria': True,
-                'includeMisc': True,
-                'includeImages': True,
-                'includePDFs': False,
-                'includeLinks': False,
-                'includeArticleText': True,
-                'includeOEMNumbers': False,
-                'includeReplacedByArticles': True,
-                'includeReplacesArticles': True,
-                'includeComparableNumbers': True,
-                'includeGTINs': True,
-                'includeTradeNumbers': True,
-                'includePrices': False,
-                'includePartsListArticles': False,
-                'includeAccessoryArticles': False,
-                'includeArticleLogisticsCriteria': False,
-                'includeDataSupplierFacets': False,
-                'includeGenericArticleFacets': True,
-                'includeCriteriaFacets': False,
-            }
-            }
+            # parameters = {
+            #     operation_name: {
+            #     'articleCountry': 'KE',
+            #     'provider': TECDOC_MANDATOR,
+            #     'lang': 'en',
+            #     'assemblyGroupNodeIds': [
+            #         int(assemblyGroupNodeIds),
+            #     ],
+            #     'linkageTargetId': int(linkageTargetIds),
+            #     'linkageTargetType': 'V',
+            #     'linkageTargetCountry': 'KE',
+            #     'page': 1,
+            #     'perPage': 100,
+            #     'sort': [
+            #         {
+            #             'field': 'mfrName',
+            #             'direction': 'asc',
+            #         },
+            #         {
+            #             'field': 'linkageSortNum',
+            #             'direction': 'asc',
+            #         },
+            #         {
+            #             'field': 'score',
+            #             'direction': 'desc',
+            #         },
+            #     ],
+            #     'filterQueries': [
+            #         '(dataSupplierId NOT IN (4978,4982))',
+            #     ],
+            #     'dataSupplierIds': [],
+            #     'genericArticleIds': [],
+            #     'includeAll': False,
+            #     'includeLinkages': True,
+            #     'linkagesPerPage': 100,
+            #     'includeGenericArticles': True,
+            #     'includeArticleCriteria': True,
+            #     'includeMisc': True,
+            #     'includeImages': True,
+            #     'includePDFs': False,
+            #     'includeLinks': False,
+            #     'includeArticleText': True,
+            #     'includeOEMNumbers': False,
+            #     'includeReplacedByArticles': True,
+            #     'includeReplacesArticles': True,
+            #     'includeComparableNumbers': True,
+            #     'includeGTINs': True,
+            #     'includeTradeNumbers': True,
+            #     'includePrices': False,
+            #     'includePartsListArticles': False,
+            #     'includeAccessoryArticles': False,
+            #     'includeArticleLogisticsCriteria': False,
+            #     'includeDataSupplierFacets': False,
+            #     'includeGenericArticleFacets': True,
+            #     'includeCriteriaFacets': False,
+            # }
+            # }
 
             
-            try:
-                json_param = json.dumps(parameters)
-                result = http_json_request(JSON_SERVICE_URL, json_param)                
-                generic_articleId = json.loads(result)["genericArticleFacets"]["counts"][0]["genericArticleId"]
-            except:
-                return Response([])                
+            # try:
+            #     json_param = json.dumps(parameters)
+            #     result = http_json_request(JSON_SERVICE_URL, json_param)                
+            #     generic_articleId = json.loads(result)["genericArticleFacets"]["counts"][0]["genericArticleId"]
+            # except:
+            #     return Response([])                
             
             
             parameters2 = {
@@ -405,7 +405,7 @@ def find_articles_from_categories(request,*args,**kwargs):
                 ],
                 'dataSupplierIds': [],
                 'genericArticleIds': [
-                    int(generic_articleId),
+                    # int(generic_articleId),
                 ],
                 'criteriaFilters': [],
                 'articleStatusIds': [],
@@ -723,7 +723,8 @@ def AutoCompleteSuggestions(request,*args,**kwargs):
 
             else:
                 return Response({'error':'searchQuery not found'})
-        except:
+        except Exception as E:            
+            print(E)
             return Response({'error':'something went wrong'})        
 
 
