@@ -301,140 +301,207 @@ def find_articles_from_categories(request,*args,**kwargs):
     try:
         linkageTargetIds = request.GET.get('linkageTargetIds')
         assemblyGroupNodeIds = request.GET.get('assemblyGroupNodeIds')
+        genericArticleId = request.GET.get('genericArticleId')
+        criteriaFilter = request.GET.get('criteriaFilter')
 
         if (linkageTargetIds !=None) and (assemblyGroupNodeIds!=None):
             operation_name = "getArticles"
-        #
-        # # Using a dictionary to generate the request payload
-            # parameters = {
-            #     operation_name: {
-            #     'articleCountry': 'KE',
-            #     'provider': TECDOC_MANDATOR,
-            #     'lang': 'en',
-            #     'assemblyGroupNodeIds': [
-            #         int(assemblyGroupNodeIds),
-            #     ],
-            #     'linkageTargetId': int(linkageTargetIds),
-            #     'linkageTargetType': 'V',
-            #     'linkageTargetCountry': 'KE',
-            #     'page': 1,
-            #     'perPage': 100,
-            #     'sort': [
-            #         {
-            #             'field': 'mfrName',
-            #             'direction': 'asc',
-            #         },
-            #         {
-            #             'field': 'linkageSortNum',
-            #             'direction': 'asc',
-            #         },
-            #         {
-            #             'field': 'score',
-            #             'direction': 'desc',
-            #         },
-            #     ],
-            #     'filterQueries': [
-            #         '(dataSupplierId NOT IN (4978,4982))',
-            #     ],
-            #     'dataSupplierIds': [],
-            #     'genericArticleIds': [],
-            #     'includeAll': False,
-            #     'includeLinkages': True,
-            #     'linkagesPerPage': 100,
-            #     'includeGenericArticles': True,
-            #     'includeArticleCriteria': True,
-            #     'includeMisc': True,
-            #     'includeImages': True,
-            #     'includePDFs': False,
-            #     'includeLinks': False,
-            #     'includeArticleText': True,
-            #     'includeOEMNumbers': False,
-            #     'includeReplacedByArticles': True,
-            #     'includeReplacesArticles': True,
-            #     'includeComparableNumbers': True,
-            #     'includeGTINs': True,
-            #     'includeTradeNumbers': True,
-            #     'includePrices': False,
-            #     'includePartsListArticles': False,
-            #     'includeAccessoryArticles': False,
-            #     'includeArticleLogisticsCriteria': False,
-            #     'includeDataSupplierFacets': False,
-            #     'includeGenericArticleFacets': True,
-            #     'includeCriteriaFacets': False,
-            # }
-            # }
+            if genericArticleId == None:                                            
+                parameters2 = {
+                    operation_name: {
+                    'articleCountry': 'KE',
+                    'provider': TECDOC_MANDATOR,
+                    'lang': 'en',
+                    'assemblyGroupNodeIds': [
+                        int(assemblyGroupNodeIds),
+                    ],
+                    'linkageTargetId': int(linkageTargetIds),
+                    'linkageTargetType': 'V',
+                    'linkageTargetCountry': 'KE',
+                    'page': 1,
+                    'perPage': 100,
+                    'sort': [
+                        {
+                            'field': 'mfrName',
+                            'direction': 'asc',
+                        },
+                        {
+                            'field': 'linkageSortNum',
+                            'direction': 'asc',
+                        },
+                        {
+                            'field': 'score',
+                            'direction': 'desc',
+                        },
+                    ],
+                    'filterQueries': [
+                        '(dataSupplierId NOT IN (4978,4982))',
+                    ],
+                    'dataSupplierIds': [],
+                    'genericArticleIds': [
+                    ],
+                    'criteriaFilters': [],
+                    'articleStatusIds': [],
+                    'includeAll': False,
+                    'includeLinkages': True,
+                    'linkagesPerPage': 100,
+                    'includeGenericArticles': True,
+                    'includeArticleCriteria': True,
+                    'includeMisc': True,
+                    'includeImages': True,
+                    'includePDFs': True,
+                    'includeLinks': True,
+                    'includeArticleText': True,
+                    'includeOEMNumbers': True,
+                    'includeReplacedByArticles': True,
+                    'includeReplacesArticles': True,
+                    'includeComparableNumbers': True,
+                    'includeGTINs': True,
+                    'includeTradeNumbers': True,
+                    'includePrices': False,
+                    'includePartsListArticles': False,
+                    'includeAccessoryArticles': False,
+                    'includeArticleLogisticsCriteria': True,
+                    'includeDataSupplierFacets': True,
+                    'includeGenericArticleFacets': True,
+                    'includeArticleStatusFacets': True,
+                    'includeCriteriaFacets': True,
+                }
+                }
 
-            
-            # try:
-            #     json_param = json.dumps(parameters)
-            #     result = http_json_request(JSON_SERVICE_URL, json_param)                
-            #     generic_articleId = json.loads(result)["genericArticleFacets"]["counts"][0]["genericArticleId"]
-            # except:
-            #     return Response([])                
-            
-            
-            parameters2 = {
-                operation_name: {
-                'articleCountry': 'KE',
-                'provider': TECDOC_MANDATOR,
-                'lang': 'en',
-                'assemblyGroupNodeIds': [
-                    int(assemblyGroupNodeIds),
-                ],
-                'linkageTargetId': int(linkageTargetIds),
-                'linkageTargetType': 'V',
-                'linkageTargetCountry': 'KE',
-                'page': 1,
-                'perPage': 100,
-                'sort': [
-                    {
-                        'field': 'mfrName',
-                        'direction': 'asc',
-                    },
-                    {
-                        'field': 'linkageSortNum',
-                        'direction': 'asc',
-                    },
-                    {
-                        'field': 'score',
-                        'direction': 'desc',
-                    },
-                ],
-                'filterQueries': [
-                    '(dataSupplierId NOT IN (4978,4982))',
-                ],
-                'dataSupplierIds': [],
-                'genericArticleIds': [
-                    # int(generic_articleId),
-                ],
-                'criteriaFilters': [],
-                'articleStatusIds': [],
-                'includeAll': False,
-                'includeLinkages': True,
-                'linkagesPerPage': 100,
-                'includeGenericArticles': True,
-                'includeArticleCriteria': True,
-                'includeMisc': True,
-                'includeImages': True,
-                'includePDFs': True,
-                'includeLinks': True,
-                'includeArticleText': True,
-                'includeOEMNumbers': True,
-                'includeReplacedByArticles': True,
-                'includeReplacesArticles': True,
-                'includeComparableNumbers': True,
-                'includeGTINs': True,
-                'includeTradeNumbers': True,
-                'includePrices': False,
-                'includePartsListArticles': False,
-                'includeAccessoryArticles': False,
-                'includeArticleLogisticsCriteria': True,
-                'includeDataSupplierFacets': True,
-                'includeGenericArticleFacets': True,
-                'includeArticleStatusFacets': True,
-                'includeCriteriaFacets': True,
-            }
-            }
+            if genericArticleId != None:
+                parameters2 = {
+                    operation_name: {
+                    'articleCountry': 'KE',
+                    'provider': TECDOC_MANDATOR,
+                    'lang': 'en',
+                    'assemblyGroupNodeIds': [
+                        int(assemblyGroupNodeIds),
+                    ],
+                    'linkageTargetId': int(linkageTargetIds),
+                    'linkageTargetType': 'V',
+                    'linkageTargetCountry': 'KE',
+                    'page': 1,
+                    'perPage': 100,
+                    'sort': [
+                        {
+                            'field': 'mfrName',
+                            'direction': 'asc',
+                        },
+                        {
+                            'field': 'linkageSortNum',
+                            'direction': 'asc',
+                        },
+                        {
+                            'field': 'score',
+                            'direction': 'desc',
+                        },
+                    ],
+                    'filterQueries': [
+                        '(dataSupplierId NOT IN (4978,4982))',
+                    ],
+                    'dataSupplierIds': [],
+                    'genericArticleIds': [
+                        int(genericArticleId),
+                    ],
+                    'criteriaFilters': [],
+                    'articleStatusIds': [],
+                    'includeAll': False,
+                    'includeLinkages': True,
+                    'linkagesPerPage': 100,
+                    'includeGenericArticles': True,
+                    'includeArticleCriteria': True,
+                    'includeMisc': True,
+                    'includeImages': True,
+                    'includePDFs': True,
+                    'includeLinks': True,
+                    'includeArticleText': True,
+                    'includeOEMNumbers': True,
+                    'includeReplacedByArticles': True,
+                    'includeReplacesArticles': True,
+                    'includeComparableNumbers': True,
+                    'includeGTINs': True,
+                    'includeTradeNumbers': True,
+                    'includePrices': False,
+                    'includePartsListArticles': False,
+                    'includeAccessoryArticles': False,
+                    'includeArticleLogisticsCriteria': True,
+                    'includeDataSupplierFacets': True,
+                    'includeGenericArticleFacets': True,
+                    'includeArticleStatusFacets': True,
+                    'includeCriteriaFacets': True,
+                }
+                }
+
+            if (genericArticleId !=None) and (criteriaFilter !=None):
+                parameters2 = {
+                    operation_name: {
+                    'articleCountry': 'KE',
+                    'provider': TECDOC_MANDATOR,
+                    'lang': 'en',
+                    'assemblyGroupNodeIds': [
+                        int(assemblyGroupNodeIds),
+                    ],
+                    'linkageTargetId': int(linkageTargetIds),
+                    'linkageTargetType': 'V',
+                    'linkageTargetCountry': 'KE',
+                    'page': 1,
+                    'perPage': 100,
+                    'sort': [
+                        {
+                            'field': 'mfrName',
+                            'direction': 'asc',
+                        },
+                        {
+                            'field': 'linkageSortNum',
+                            'direction': 'asc',
+                        },
+                        {
+                            'field': 'score',
+                            'direction': 'desc',
+                        },
+                    ],
+                    'filterQueries': [
+                        '(dataSupplierId NOT IN (4978,4982))',
+                    ],
+                    'dataSupplierIds': [],
+                    'genericArticleIds': [
+                        int(genericArticleId),
+                    ],
+                    'criteriaFilters': [
+                        {
+                        'criteriaId': int(criteriaFilter),
+                        'rawValue': 'VA',
+                        },
+                    ],
+                    'articleStatusIds': [],
+                    'includeAll': False,
+                    'includeLinkages': True,
+                    'linkagesPerPage': 100,
+                    'includeGenericArticles': True,
+                    'includeArticleCriteria': True,
+                    'includeMisc': True,
+                    'includeImages': True,
+                    'includePDFs': True,
+                    'includeLinks': True,
+                    'includeArticleText': True,
+                    'includeOEMNumbers': True,
+                    'includeReplacedByArticles': True,
+                    'includeReplacesArticles': True,
+                    'includeComparableNumbers': True,
+                    'includeGTINs': True,
+                    'includeTradeNumbers': True,
+                    'includePrices': False,
+                    'includePartsListArticles': False,
+                    'includeAccessoryArticles': False,
+                    'includeArticleLogisticsCriteria': True,
+                    'includeDataSupplierFacets': True,
+                    'includeGenericArticleFacets': True,
+                    'includeArticleStatusFacets': True,
+                    'includeCriteriaFacets': True,
+                }
+                }
+
 
             json_param2 = json.dumps(parameters2)
             result2 = http_json_request(JSON_SERVICE_URL, json_param2)
@@ -478,9 +545,18 @@ def find_articles_from_categories(request,*args,**kwargs):
                 except:
                     oem_number = None
 
-                
+            part_categories = dict()
+            part_categories['parts'] = macthed_oem_db
+            part_categories['part_subcategories'] = json.loads(result2)['genericArticleFacets']
+            if genericArticleId !=None:
+                try:
+                    part_categories['part_criteriaFacets'] = json.loads(result2)['criteriaFacets']
+                except:
+                    part_categories['part_criteriaFacets'] = []
 
-            return Response(macthed_oem_db)
+                
+            
+            return Response(part_categories)
 
         return Response({'error':'linkageTarget assemblyGroupNodeIds id not found'})
     except:
@@ -1053,9 +1129,6 @@ def epc_scraper_data(manufacture,framenumber):
 # '---------------------------------------------------------------------------------------------------'
 
 
-
-
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 @authentication_classes([JWTAuthentication])
@@ -1180,8 +1253,6 @@ def searchbyframenumber(request,*args,**kwargs):
         return Response({'error':'framenumber or manufacture not found'})     
     except:
         return Response({'error':'something went wrong'})
-
-
 
 
 
