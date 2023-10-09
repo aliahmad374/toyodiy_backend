@@ -303,6 +303,7 @@ def find_articles_from_categories(request,*args,**kwargs):
         assemblyGroupNodeIds = request.GET.get('assemblyGroupNodeIds')
         genericArticleId = request.GET.get('genericArticleId')
         criteriaFilter = request.GET.get('criteriaFilter')
+        rawValue = request.GET.get('rawValue')
 
         if (linkageTargetIds !=None) and (assemblyGroupNodeIds!=None):
             operation_name = "getArticles"
@@ -471,7 +472,7 @@ def find_articles_from_categories(request,*args,**kwargs):
                     'criteriaFilters': [
                         {
                         'criteriaId': int(criteriaFilter),
-                        'rawValue': 'VA',
+                        'rawValue': f'{rawValue}',
                         },
                     ],
                     'articleStatusIds': [],
@@ -502,7 +503,7 @@ def find_articles_from_categories(request,*args,**kwargs):
                 }
                 }
 
-
+            
             json_param2 = json.dumps(parameters2)
             result2 = http_json_request(JSON_SERVICE_URL, json_param2)
 
@@ -795,7 +796,7 @@ def AutoCompleteSuggestions(request,*args,**kwargs):
 
                             
 
-                return Response(macthed_oem_db)
+                return Response({'parts':macthed_oem_db})
 
             else:
                 return Response({'error':'searchQuery not found'})
