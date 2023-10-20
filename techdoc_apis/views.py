@@ -240,8 +240,33 @@ def find_categories_subcategories(request, *args, **kwargs):
                             pass
                     except:
                         pass
+            # add assembly group factes as well
+            assembly_groups1 = json.loads(result)['assemblyGroupFacets']['counts']
+            for loop_cat in assembly_groups1:
+                try:
+                    parent_node = loop_cat['parentNodeId']
+                except:
+                    parent_node = ""
 
-            return Response(only_categories)
+                assembly_groups = json.loads(result)['assemblyGroupFacets']['counts']
+                if parent_node!="":
+                    for loop_cat2 in assembly_groups:
+                        try:
+                            assemb = loop_cat2['assemblyGroupNodeId']
+                        except:
+                            assemb = ""
+                        if assemb!=""  and loop_cat2['assemblyGroupNodeId'] == parent_node:
+                            loop_cat['assemblyGroupName'] =  loop_cat['assemblyGroupName'] + " " +'['+loop_cat2['assemblyGroupName']+']'
+                            break
+
+
+
+
+            response_main = dict()
+            response_main['categories'] = only_categories
+            response_main['genericArticleFacets'] = assembly_groups1
+
+            return Response(response_main)
         return Response({'error':'linkageTarget id not found'})
     except:
         return Response({'error':'something went wrong'})
