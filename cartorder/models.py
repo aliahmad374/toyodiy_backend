@@ -27,6 +27,9 @@ class CartProduct(models.Model):
     total_price = models.DecimalField(max_digits=20, decimal_places=5)
     price = models.DecimalField(max_digits=20, decimal_places=2)
     product_id = models.CharField(max_length=30)  # Assuming product_id is a unique identifier
+    itemid = models.CharField(max_length=40)
+    group4 = models.CharField(max_length=40)
+    stkgencode = models.CharField(max_length=40)
     def __str__(self):
         return f"{self.product_name} - {self.order.order_id}"
     class Meta:
