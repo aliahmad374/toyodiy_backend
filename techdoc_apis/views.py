@@ -629,10 +629,11 @@ def find_articles_from_categories(request,*args,**kwargs):
                                         check_point_flag = True
                                         new_data = new_loop.copy()
                                         new_data['Quantity_article'] = int(new_data['loc01'])+int(new_data['loc02'])+int(new_data['loc03'])+int(new_data['loc04'])+int(new_data['loc05'])+int(new_data['loc06'])+int(new_data['loc07'])+int(new_data['loc08'])+int(new_data['loc09'])+int(new_data['loc10'])+int(new_data['loc11'])+int(new_data['loc12'])+int(new_data['loc13'])+int(new_data['loc14'])+int(new_data['loc15'])+int(new_data['loc16'])+int(new_data['loc17'])+int(new_data['loc18'])+int(new_data['loc19'])+int(new_data['loc20'])+int(new_data['loc31'])+int(new_data['loc32'])+int(new_data['loc33'])+int(new_data['loc34'])+int(new_data['loc35'])+int(new_data['loc36'])+int(new_data['loc37'])+int(new_data['loc38'])+int(new_data['loc39'])+int(new_data['loc40'])
-                                        new_data['images'] = article_list['images']                                    
-                                        if new_data['id'] not in filter_done:                                        
-                                            macthed_oem_db.append(new_data)
-                                            filter_done.append(new_data['id'])                                  
+                                        if (new_data['Quantity_article'] != 0) and (new_data['price2'] != 0):
+                                            new_data['images'] = article_list['images']                                    
+                                            if new_data['id'] not in filter_done:                                        
+                                                macthed_oem_db.append(new_data)
+                                                filter_done.append(new_data['id'])                                  
                 except:
                     oem_number = None
 
