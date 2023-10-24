@@ -241,25 +241,28 @@ def find_categories_subcategories(request, *args, **kwargs):
                     except:
                         pass
             # add assembly group factes as well
-            assembly_groups1 = json.loads(result)['assemblyGroupFacets']['counts']
-            for loop_cat in assembly_groups1:
-                try:
-                    parent_node = loop_cat['parentNodeId']
-                except:
-                    parent_node = ""
+            # assembly_groups1 = json.loads(result)['assemblyGroupFacets']['counts']
+            # for loop_cat in assembly_groups1:
+            #     try:
+            #         parent_node = loop_cat['parentNodeId']
+            #     except:
+            #         parent_node = ""
 
-                assembly_groups = json.loads(result)['assemblyGroupFacets']['counts']
-                if parent_node!="":
-                    for loop_cat2 in assembly_groups:
-                        try:
-                            assemb = loop_cat2['assemblyGroupNodeId']
-                        except:
-                            assemb = ""
-                        if assemb!=""  and loop_cat2['assemblyGroupNodeId'] == parent_node:
-                            loop_cat['assemblyGroupName'] =  loop_cat['assemblyGroupName'] + " " +'['+loop_cat2['assemblyGroupName']+']'
-                            break
-
-
+            #     assembly_groups = json.loads(result)['assemblyGroupFacets']['counts']
+            #     if parent_node!="":
+            #         for loop_cat2 in assembly_groups:
+            #             try:
+            #                 assemb = loop_cat2['assemblyGroupNodeId']
+            #             except:
+            #                 assemb = ""
+            #             if assemb!=""  and loop_cat2['assemblyGroupNodeId'] == parent_node:
+            #                 loop_cat['assemblyGroupName'] =  loop_cat['assemblyGroupName'] + " " +'['+loop_cat2['assemblyGroupName']+']'
+            #                 break
+            try:
+                assembly_groups1 = json.loads(result)['genericArticleFacets']['counts']
+            except:
+                assembly_groups1 = []
+   
 
 
             response_main = dict()
@@ -330,8 +333,8 @@ def find_articles_from_categories(request,*args,**kwargs):
         criteriaFilter = request.GET.get('criteriaFilter')
         rawValue = request.GET.get('rawValue')
 
-        if (linkageTargetIds !=None) and (assemblyGroupNodeIds!=None):
-            operation_name = "getArticles"
+        if ((linkageTargetIds !=None) and (assemblyGroupNodeIds!=None)) or ((linkageTargetIds !=None) and (genericArticleId!=None)):
+            operation_name = "getArticles"            
             if genericArticleId == None:                                            
                 parameters2 = {
                     operation_name: {
@@ -395,7 +398,69 @@ def find_articles_from_categories(request,*args,**kwargs):
                 }
                 }
 
-            if genericArticleId != None:
+            elif (genericArticleId !=None)  and (assemblyGroupNodeIds ==None):
+                
+                parameters2 = {
+                    operation_name: {
+                        'articleCountry': 'KE',
+                        'provider': TECDOC_MANDATOR,
+                        'lang': 'en',
+                        'linkageTargetId': int(linkageTargetIds),
+                        'linkageTargetType': 'V',
+                        'linkageTargetCountry': 'KE',
+                        'page': 1,
+                        'perPage': 100,
+                        'sort': [
+                            {
+                                'field': 'mfrName',
+                                'direction': 'asc',
+                            },
+                            {
+                                'field': 'linkageSortNum',
+                                'direction': 'asc',
+                            },
+                            {
+                                'field': 'score',
+                                'direction': 'desc',
+                            },
+                        ],
+                        'filterQueries': [
+                            '(dataSupplierId NOT IN (4978,4982))',
+                        ],
+                        'dataSupplierIds': [],
+                        'genericArticleIds': [
+                            int(genericArticleId),
+                        ],
+                        'criteriaFilters': [],
+                        'articleStatusIds': [],
+                        'includeAll': False,
+                        'includeLinkages': True,
+                        'linkagesPerPage': 100,
+                        'includeGenericArticles': True,
+                        'includeArticleCriteria': True,
+                        'includeMisc': True,
+                        'includeImages': True,
+                        'includePDFs': True,
+                        'includeLinks': True,
+                        'includeArticleText': True,
+                        'includeOEMNumbers': True,
+                        'includeReplacedByArticles': True,
+                        'includeReplacesArticles': True,
+                        'includeComparableNumbers': True,
+                        'includeGTINs': True,
+                        'includeTradeNumbers': True,
+                        'includePrices': False,
+                        'includePartsListArticles': False,
+                        'includeAccessoryArticles': False,
+                        'includeArticleLogisticsCriteria': True,
+                        'includeDataSupplierFacets': True,
+                        'includeGenericArticleFacets': True,
+                        'includeArticleStatusFacets': True,
+                        'includeCriteriaFacets': True,
+                    },
+            }
+                
+            elif genericArticleId != None:
                 parameters2 = {
                     operation_name: {
                     'articleCountry': 'KE',
@@ -459,7 +524,7 @@ def find_articles_from_categories(request,*args,**kwargs):
                 }
                 }
 
-            if (genericArticleId !=None) and (criteriaFilter !=None):
+            elif (genericArticleId !=None) and (criteriaFilter !=None):
                 parameters2 = {
                     operation_name: {
                     'articleCountry': 'KE',
