@@ -335,7 +335,8 @@ def find_articles_from_categories(request,*args,**kwargs):
 
         if ((linkageTargetIds !=None) and (assemblyGroupNodeIds!=None)) or ((linkageTargetIds !=None) and (genericArticleId!=None)):
             operation_name = "getArticles"            
-            if genericArticleId == None:                                            
+            if genericArticleId == None:
+                # print('I am executing')                                         
                 parameters2 = {
                     operation_name: {
                     'articleCountry': 'KE',
@@ -603,10 +604,13 @@ def find_articles_from_categories(request,*args,**kwargs):
             filter_done = []
             
 
+            print("json.loads(result2)['articles'])",len(json.loads(result2)['articles']))
+
             for article_list in json.loads(result2)['articles']:
                 
                 check_point_flag = False             
-                try:                    
+                try:
+                    print("article_list['oemNumbers']",len(article_list['oemNumbers']))                    
                     for oem_loop in  article_list['oemNumbers']:
                         # print('count 2')                       
                         if oem_loop['articleNumber'] not in already_done:                                                      
@@ -617,23 +621,35 @@ def find_articles_from_categories(request,*args,**kwargs):
                                 # search_database = Eztb3105.objects.filter(searchfield__icontains=oem_number)
                                 search_database = Eztb3105.objects.filter(ref2=oem_number)
                                 search_database_serializer = Eztb3105Serializer(search_database,many=True)
-                                
 
-                                if len(search_database_serializer.data) > 0:                                                                    
+                                if len(search_database_serializer.data) > 0:                                                                                                        
                                     find_unique_id = search_database_serializer.data[0].get('uniqueid')
-                                    
-                                    search_database1 = Eztb3105.objects.filter(uniqueid=find_unique_id)
-                                    search_database_serializer1 = Eztb3105Serializer(search_database1,many=True)
-
-                                    for new_loop in search_database_serializer1.data:
-                                        check_point_flag = True
-                                        new_data = new_loop.copy()
-                                        new_data['Quantity_article'] = int(new_data['loc01'])+int(new_data['loc02'])+int(new_data['loc03'])+int(new_data['loc04'])+int(new_data['loc05'])+int(new_data['loc06'])+int(new_data['loc07'])+int(new_data['loc08'])+int(new_data['loc09'])+int(new_data['loc10'])+int(new_data['loc11'])+int(new_data['loc12'])+int(new_data['loc13'])+int(new_data['loc14'])+int(new_data['loc15'])+int(new_data['loc16'])+int(new_data['loc17'])+int(new_data['loc18'])+int(new_data['loc19'])+int(new_data['loc20'])+int(new_data['loc31'])+int(new_data['loc32'])+int(new_data['loc33'])+int(new_data['loc34'])+int(new_data['loc35'])+int(new_data['loc36'])+int(new_data['loc37'])+int(new_data['loc38'])+int(new_data['loc39'])+int(new_data['loc40'])
-                                        if (new_data['Quantity_article'] != 0) and (new_data['price2'] != 0):
-                                            new_data['images'] = article_list['images']                                    
-                                            if new_data['id'] not in filter_done:                                        
-                                                macthed_oem_db.append(new_data)
-                                                filter_done.append(new_data['id'])                                  
+                                    if find_unique_id != 0:
+                                        search_database1 = Eztb3105.objects.filter(uniqueid=find_unique_id)
+                                        search_database_serializer1 = Eztb3105Serializer(search_database1,many=True)                                        
+                                        for new_loop in search_database_serializer1.data:
+                                            # print('last check point')
+                                            check_point_flag = True
+                                            new_data = new_loop.copy()
+                                            new_data['Quantity_article'] = int(new_data['loc01'])+int(new_data['loc02'])+int(new_data['loc03'])+int(new_data['loc04'])+int(new_data['loc05'])+int(new_data['loc06'])+int(new_data['loc07'])+int(new_data['loc08'])+int(new_data['loc09'])+int(new_data['loc10'])+int(new_data['loc11'])+int(new_data['loc12'])+int(new_data['loc13'])+int(new_data['loc14'])+int(new_data['loc15'])+int(new_data['loc16'])+int(new_data['loc17'])+int(new_data['loc18'])+int(new_data['loc19'])+int(new_data['loc20'])+int(new_data['loc31'])+int(new_data['loc32'])+int(new_data['loc33'])+int(new_data['loc34'])+int(new_data['loc35'])+int(new_data['loc36'])+int(new_data['loc37'])+int(new_data['loc38'])+int(new_data['loc39'])+int(new_data['loc40'])
+                                            if (new_data['Quantity_article'] != 0) and (new_data['price2'] != 0):
+                                                new_data['images'] = article_list['images']                                    
+                                                if new_data['id'] not in filter_done:                                        
+                                                    macthed_oem_db.append(new_data)
+                                                    filter_done.append(new_data['id'])
+                                    else:
+                                        print('i am else')
+                                        for new_loop in search_database_serializer.data:
+                                            # print('last check point')
+                                            check_point_flag = True
+                                            new_data = new_loop.copy()
+                                            new_data['Quantity_article'] = int(new_data['loc01'])+int(new_data['loc02'])+int(new_data['loc03'])+int(new_data['loc04'])+int(new_data['loc05'])+int(new_data['loc06'])+int(new_data['loc07'])+int(new_data['loc08'])+int(new_data['loc09'])+int(new_data['loc10'])+int(new_data['loc11'])+int(new_data['loc12'])+int(new_data['loc13'])+int(new_data['loc14'])+int(new_data['loc15'])+int(new_data['loc16'])+int(new_data['loc17'])+int(new_data['loc18'])+int(new_data['loc19'])+int(new_data['loc20'])+int(new_data['loc31'])+int(new_data['loc32'])+int(new_data['loc33'])+int(new_data['loc34'])+int(new_data['loc35'])+int(new_data['loc36'])+int(new_data['loc37'])+int(new_data['loc38'])+int(new_data['loc39'])+int(new_data['loc40'])
+                                            if (new_data['Quantity_article'] != 0) and (new_data['price2'] != 0):
+                                                new_data['images'] = article_list['images']                                    
+                                                if new_data['id'] not in filter_done:                                        
+                                                    macthed_oem_db.append(new_data)
+                                                    filter_done.append(new_data['id'])
+                                        a=1                                                  
                 except:
                     oem_number = None
 
@@ -861,26 +877,35 @@ def AutoCompleteSuggestions(request,*args,**kwargs):
                                                         
                             if (oem_number!=None) and (check_point_flag == False):
                                 
-                                search_database = Eztb3105.objects.filter(ref2=oem_number)
+                                # search_database = Eztb3105.objects.filter(ref2=oem_number)
+                                search_database = Eztb3105.objects.filter(searchfield__icontains=oem_number)
                                 search_database_serializer = Eztb3105Serializer(search_database,many=True)
                                 
 
                                 if len(search_database_serializer.data) > 0:                                                                    
                                     find_unique_id = search_database_serializer.data[0].get('uniqueid')
-                                    
-                                    search_database1 = Eztb3105.objects.filter(uniqueid=find_unique_id)
-                                    search_database_serializer1 = Eztb3105Serializer(search_database1,many=True)
 
-                                    for new_loop in search_database_serializer1.data:
-                                        check_point_flag = True
-                                        new_data = new_loop.copy()
-                                        new_data['Quantity_article'] = int(new_data['loc01'])+int(new_data['loc02'])+int(new_data['loc03'])+int(new_data['loc04'])+int(new_data['loc05'])+int(new_data['loc06'])+int(new_data['loc07'])+int(new_data['loc08'])+int(new_data['loc09'])+int(new_data['loc10'])+int(new_data['loc11'])+int(new_data['loc12'])+int(new_data['loc13'])+int(new_data['loc14'])+int(new_data['loc15'])+int(new_data['loc16'])+int(new_data['loc17'])+int(new_data['loc18'])+int(new_data['loc19'])+int(new_data['loc20'])+int(new_data['loc31'])+int(new_data['loc32'])+int(new_data['loc33'])+int(new_data['loc34'])+int(new_data['loc35'])+int(new_data['loc36'])+int(new_data['loc37'])+int(new_data['loc38'])+int(new_data['loc39'])+int(new_data['loc40'])
-                                        new_data['images'] = article_list['images']                                    
-                                        if new_data['id'] not in filter_done:                                        
-                                            macthed_oem_db.append(new_data)
-                                            filter_done.append(new_data['id'])
-                                           
-                            
+                                    if find_unique_id != 0:                                    
+                                        search_database1 = Eztb3105.objects.filter(uniqueid=find_unique_id)
+                                        search_database_serializer1 = Eztb3105Serializer(search_database1,many=True)
+
+                                        for new_loop in search_database_serializer1.data:
+                                            check_point_flag = True
+                                            new_data = new_loop.copy()
+                                            new_data['Quantity_article'] = int(new_data['loc01'])+int(new_data['loc02'])+int(new_data['loc03'])+int(new_data['loc04'])+int(new_data['loc05'])+int(new_data['loc06'])+int(new_data['loc07'])+int(new_data['loc08'])+int(new_data['loc09'])+int(new_data['loc10'])+int(new_data['loc11'])+int(new_data['loc12'])+int(new_data['loc13'])+int(new_data['loc14'])+int(new_data['loc15'])+int(new_data['loc16'])+int(new_data['loc17'])+int(new_data['loc18'])+int(new_data['loc19'])+int(new_data['loc20'])+int(new_data['loc31'])+int(new_data['loc32'])+int(new_data['loc33'])+int(new_data['loc34'])+int(new_data['loc35'])+int(new_data['loc36'])+int(new_data['loc37'])+int(new_data['loc38'])+int(new_data['loc39'])+int(new_data['loc40'])
+                                            new_data['images'] = article_list['images']                                    
+                                            if new_data['id'] not in filter_done:                                        
+                                                macthed_oem_db.append(new_data)
+                                                filter_done.append(new_data['id'])
+                                    else:
+                                        for new_loop in search_database_serializer.data:
+                                            check_point_flag = True
+                                            new_data = new_loop.copy()
+                                            new_data['Quantity_article'] = int(new_data['loc01'])+int(new_data['loc02'])+int(new_data['loc03'])+int(new_data['loc04'])+int(new_data['loc05'])+int(new_data['loc06'])+int(new_data['loc07'])+int(new_data['loc08'])+int(new_data['loc09'])+int(new_data['loc10'])+int(new_data['loc11'])+int(new_data['loc12'])+int(new_data['loc13'])+int(new_data['loc14'])+int(new_data['loc15'])+int(new_data['loc16'])+int(new_data['loc17'])+int(new_data['loc18'])+int(new_data['loc19'])+int(new_data['loc20'])+int(new_data['loc31'])+int(new_data['loc32'])+int(new_data['loc33'])+int(new_data['loc34'])+int(new_data['loc35'])+int(new_data['loc36'])+int(new_data['loc37'])+int(new_data['loc38'])+int(new_data['loc39'])+int(new_data['loc40'])
+                                            new_data['images'] = article_list['images']                                    
+                                            if new_data['id'] not in filter_done:                                        
+                                                macthed_oem_db.append(new_data)
+                                                filter_done.append(new_data['id'])  
                                   
                 except:
                     oem_number = None
@@ -895,6 +920,35 @@ def AutoCompleteSuggestions(request,*args,**kwargs):
             print(E)
             return Response({'error':'something went wrong'})        
 
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+def AutoCompleteSuggestions_two(request,*args,**kwargs):
+    try:
+        searchQuery = request.GET.get('searchquery')
+        if (searchQuery!=None):
+            print('--------------------')
+            print(searchQuery)
+            print('--------------------')
+            macthed_oem_db =[]
+            search_database = Eztb3105.objects.filter(searchfield__icontains=searchQuery)
+            # search_database = Eztb3105.objects.filter(searchfield__icontains=oem_number)
+            search_database_serializer = Eztb3105Serializer(search_database,many=True)
+            if len(search_database_serializer.data) > 0:                                                                    
+
+                for new_loop in search_database_serializer.data:
+                    new_data = new_loop.copy()
+                    new_data['Quantity_article'] = int(new_data['loc01'])+int(new_data['loc02'])+int(new_data['loc03'])+int(new_data['loc04'])+int(new_data['loc05'])+int(new_data['loc06'])+int(new_data['loc07'])+int(new_data['loc08'])+int(new_data['loc09'])+int(new_data['loc10'])+int(new_data['loc11'])+int(new_data['loc12'])+int(new_data['loc13'])+int(new_data['loc14'])+int(new_data['loc15'])+int(new_data['loc16'])+int(new_data['loc17'])+int(new_data['loc18'])+int(new_data['loc19'])+int(new_data['loc20'])+int(new_data['loc31'])+int(new_data['loc32'])+int(new_data['loc33'])+int(new_data['loc34'])+int(new_data['loc35'])+int(new_data['loc36'])+int(new_data['loc37'])+int(new_data['loc38'])+int(new_data['loc39'])+int(new_data['loc40'])                                       
+                    macthed_oem_db.append(new_data)
+
+                return Response({'parts':macthed_oem_db})
+        else:
+            return Response({'error':'searchQuery not found'})
+            
+            
+    except:
+        return Response({'error':'something went wrong'})        
 
 
 @api_view(['GET'])
