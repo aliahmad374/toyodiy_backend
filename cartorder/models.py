@@ -30,6 +30,7 @@ class CartProduct(models.Model):
     itemid = models.CharField(max_length=40)
     group4 = models.CharField(max_length=40)
     stkgencode = models.CharField(max_length=40)
+    linkageid = models.CharField(max_length=40)
     def __str__(self):
         return f"{self.product_name} - {self.order.order_id}"
     class Meta:

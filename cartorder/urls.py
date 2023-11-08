@@ -7,4 +7,5 @@ urlpatterns = [
     path('vieworder/',views.SearchOrderView.as_view(),name='vieworder'),
     path('admin/changeorder/',views.ChangeOrderStatusView.as_view(),name='changeorder'),
     path('myorders/',views.MyOrdersView.as_view(),name='myorders'),
+    path('get_order_by_car/',views.get_orders_by_car_linkage_id,name='myordersbycar'),
 ]
