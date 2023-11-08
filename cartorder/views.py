@@ -14,7 +14,8 @@ import time
 from .models import CartOrder,CartProduct
 from cartorder.utils import Util
 # Create your views here.
-
+from rest_framework.decorators import permission_classes, authentication_classes
+from rest_framework.decorators import api_view
 
 def send_verification_email(email,name,orderid,usertype):
 
@@ -158,3 +159,23 @@ class MyOrdersView(APIView):
             print(E)
             return Response({'error':'something went wrong'},status=status.HTTP_400_BAD_REQUEST)
 
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+def get_orders_by_car_linkage_id(request, *args, **kwargs):
+    linkage_id = request.GET.get('linkageid')
+    if linkage_id != None:
+        order_table = CartOrder.objects.filter(email=request.user)
+        order_table_serialized = CartOrderSerializer(order_table,many=True)
+        ids_user = [v['id'] for v in order_table_serialized.data]
+
+        product_table = CartProduct.objects.filter(order_id__in=ids_user).filter(linkageid=linkage_id)
+        product_table_serialized = CartProductSerializer(product_table,many=True)
+
+        return Response({'success':product_table_serialized.data},status=status.HTTP_200_OK)
+    else:
+        return Response({'error':'linkageid cannot be null'},status=status.HTTP_400_BAD_REQUEST)
+
+    

@@ -10,6 +10,9 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from .serializers import Eztb3105Serializer
 from .models import Eztb3105
 import scrapy
+from django.db.models import Q
+import re
+import copy
 # from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
 # Create your views here.
@@ -332,11 +335,11 @@ def find_articles_from_categories(request,*args,**kwargs):
         genericArticleId = request.GET.get('genericArticleId')
         criteriaFilter = request.GET.get('criteriaFilter')
         rawValue = request.GET.get('rawValue')
+        manufacture = request.GET.get('manufacture')
 
         if ((linkageTargetIds !=None) and (assemblyGroupNodeIds!=None)) or ((linkageTargetIds !=None) and (genericArticleId!=None)):
             operation_name = "getArticles"            
-            if genericArticleId == None:
-                # print('I am executing')                                         
+            if genericArticleId == None:                                                       
                 parameters2 = {
                     operation_name: {
                     'articleCountry': 'KE',
@@ -604,52 +607,47 @@ def find_articles_from_categories(request,*args,**kwargs):
             filter_done = []
             
 
-            print("json.loads(result2)['articles'])",len(json.loads(result2)['articles']))
-
-            for article_list in json.loads(result2)['articles']:
-                
-                check_point_flag = False             
-                try:
-                    print("article_list['oemNumbers']",len(article_list['oemNumbers']))                    
+            for article_list in json.loads(result2)['articles']:        
+                try:                   
                     for oem_loop in  article_list['oemNumbers']:
-                        # print('count 2')                       
-                        if oem_loop['articleNumber'] not in already_done:                                                      
-                            oem_number = oem_loop['articleNumber']                           
-                            already_done.append(oem_number)  
-                                                        
-                            if (oem_number!=None) and (check_point_flag == False):
-                                # search_database = Eztb3105.objects.filter(searchfield__icontains=oem_number)
-                                search_database = Eztb3105.objects.filter(ref2=oem_number)
-                                search_database_serializer = Eztb3105Serializer(search_database,many=True)
+                        
+                        if oem_loop['mfrName'] == manufacture:
+                                                
+                            if oem_loop['articleNumber'] not in already_done:                                                    
+                                oem_number = oem_loop['articleNumber']                           
+                                already_done.append(oem_number)                                          
+                    if (len(already_done)>0):
+                        # search_database = Eztb3105.objects.filter(searchfield__icontains=oem_number)
+                        search_database = Eztb3105.objects.filter(ref2__in=already_done)
+                        search_database_serializer = Eztb3105Serializer(search_database,many=True)
+                        
 
-                                if len(search_database_serializer.data) > 0:                                                                                                        
-                                    find_unique_id = search_database_serializer.data[0].get('uniqueid')
-                                    if find_unique_id != 0:
-                                        search_database1 = Eztb3105.objects.filter(uniqueid=find_unique_id)
-                                        search_database_serializer1 = Eztb3105Serializer(search_database1,many=True)                                        
-                                        for new_loop in search_database_serializer1.data:
-                                            # print('last check point')
-                                            check_point_flag = True
-                                            new_data = new_loop.copy()
-                                            new_data['Quantity_article'] = int(new_data['loc01'])+int(new_data['loc02'])+int(new_data['loc03'])+int(new_data['loc04'])+int(new_data['loc05'])+int(new_data['loc06'])+int(new_data['loc07'])+int(new_data['loc08'])+int(new_data['loc09'])+int(new_data['loc10'])+int(new_data['loc11'])+int(new_data['loc12'])+int(new_data['loc13'])+int(new_data['loc14'])+int(new_data['loc15'])+int(new_data['loc16'])+int(new_data['loc17'])+int(new_data['loc18'])+int(new_data['loc19'])+int(new_data['loc20'])+int(new_data['loc31'])+int(new_data['loc32'])+int(new_data['loc33'])+int(new_data['loc34'])+int(new_data['loc35'])+int(new_data['loc36'])+int(new_data['loc37'])+int(new_data['loc38'])+int(new_data['loc39'])+int(new_data['loc40'])
-                                            if (new_data['Quantity_article'] != 0) and (new_data['price2'] != 0):
-                                                new_data['images'] = article_list['images']                                    
-                                                if new_data['id'] not in filter_done:                                        
-                                                    macthed_oem_db.append(new_data)
-                                                    filter_done.append(new_data['id'])
-                                    else:
-                                        print('i am else')
-                                        for new_loop in search_database_serializer.data:
-                                            # print('last check point')
-                                            check_point_flag = True
-                                            new_data = new_loop.copy()
-                                            new_data['Quantity_article'] = int(new_data['loc01'])+int(new_data['loc02'])+int(new_data['loc03'])+int(new_data['loc04'])+int(new_data['loc05'])+int(new_data['loc06'])+int(new_data['loc07'])+int(new_data['loc08'])+int(new_data['loc09'])+int(new_data['loc10'])+int(new_data['loc11'])+int(new_data['loc12'])+int(new_data['loc13'])+int(new_data['loc14'])+int(new_data['loc15'])+int(new_data['loc16'])+int(new_data['loc17'])+int(new_data['loc18'])+int(new_data['loc19'])+int(new_data['loc20'])+int(new_data['loc31'])+int(new_data['loc32'])+int(new_data['loc33'])+int(new_data['loc34'])+int(new_data['loc35'])+int(new_data['loc36'])+int(new_data['loc37'])+int(new_data['loc38'])+int(new_data['loc39'])+int(new_data['loc40'])
-                                            if (new_data['Quantity_article'] != 0) and (new_data['price2'] != 0):
-                                                new_data['images'] = article_list['images']                                    
-                                                if new_data['id'] not in filter_done:                                        
-                                                    macthed_oem_db.append(new_data)
-                                                    filter_done.append(new_data['id'])
-                                        a=1                                                  
+                        if len(search_database_serializer.data) > 0:                                                                                                        
+                            find_unique_id = [v.get('uniqueid') for v in search_database_serializer.data if v.get('uniqueid')!=0]
+                            find_unique_id_zero = [v.get('uniqueid') for v in search_database_serializer.data if v.get('uniqueid')==0]
+                             
+                            search_database1 = Eztb3105.objects.filter(uniqueid__in=find_unique_id)
+                            search_database_serializer1 = Eztb3105Serializer(search_database1,many=True)                                        
+                            for new_loop in search_database_serializer1.data:                                
+                                new_data = new_loop.copy()
+                                new_data['Quantity_article'] = int(new_data['loc01'])+int(new_data['loc02'])+int(new_data['loc03'])+int(new_data['loc04'])+int(new_data['loc05'])+int(new_data['loc06'])+int(new_data['loc07'])+int(new_data['loc08'])+int(new_data['loc09'])+int(new_data['loc10'])+int(new_data['loc11'])+int(new_data['loc12'])+int(new_data['loc13'])+int(new_data['loc14'])+int(new_data['loc15'])+int(new_data['loc16'])+int(new_data['loc17'])+int(new_data['loc18'])+int(new_data['loc19'])+int(new_data['loc20'])+int(new_data['loc21'])+int(new_data['loc22'])+int(new_data['loc23'])+int(new_data['loc24'])+int(new_data['loc25'])+int(new_data['loc26'])+int(new_data['loc27'])+int(new_data['loc28'])+int(new_data['loc29'])+int(new_data['loc30'])+int(new_data['loc31'])+int(new_data['loc32'])+int(new_data['loc33'])+int(new_data['loc34'])+int(new_data['loc35'])+int(new_data['loc36'])+int(new_data['loc37'])+int(new_data['loc38'])+int(new_data['loc39'])+int(new_data['loc40'])
+                                if (new_data['Quantity_article'] != 0) and (new_data['price2'] != 0):
+                                    new_data['images'] = article_list['images']                                    
+                                    if new_data['id'] not in filter_done:                                        
+                                        macthed_oem_db.append(new_data)
+                                        filter_done.append(new_data['id'])
+                            if len(find_unique_id_zero) > 0:                                
+                                for new_loop in search_database_serializer.data:
+                                    if new_loop.get('uniqueid')==0:                                           
+                                                                            
+                                        new_data = new_loop.copy()
+                                        new_data['Quantity_article'] = int(new_data['loc01'])+int(new_data['loc02'])+int(new_data['loc03'])+int(new_data['loc04'])+int(new_data['loc05'])+int(new_data['loc06'])+int(new_data['loc07'])+int(new_data['loc08'])+int(new_data['loc09'])+int(new_data['loc10'])+int(new_data['loc11'])+int(new_data['loc12'])+int(new_data['loc13'])+int(new_data['loc14'])+int(new_data['loc15'])+int(new_data['loc16'])+int(new_data['loc17'])+int(new_data['loc18'])+int(new_data['loc19'])+int(new_data['loc20'])+int(new_data['loc21'])+int(new_data['loc22'])+int(new_data['loc23'])+int(new_data['loc24'])+int(new_data['loc25'])+int(new_data['loc26'])+int(new_data['loc27'])+int(new_data['loc28'])+int(new_data['loc29'])+int(new_data['loc30'])+int(new_data['loc31'])+int(new_data['loc32'])+int(new_data['loc33'])+int(new_data['loc34'])+int(new_data['loc35'])+int(new_data['loc36'])+int(new_data['loc37'])+int(new_data['loc38'])+int(new_data['loc39'])+int(new_data['loc40'])
+                                        if (new_data['Quantity_article'] != 0) and (new_data['price2'] != 0):
+                                            new_data['images'] = article_list['images']                                    
+                                            if new_data['id'] not in filter_done:                                        
+                                                macthed_oem_db.append(new_data)
+                                                filter_done.append(new_data['id'])
+                                                                                             
                 except:
                     oem_number = None
 
@@ -704,251 +702,305 @@ def find_article_information(request,*args,**kwargs):
     except:
         return Response({'error':'something went wrong'})    
 
+
+
+
+
+
+
+
+
+
+def convert_dict(data):
+    item = dict()
+    for v in data:
+        try:
+            oem = v['ref2'].split(' ')[0].split('/')[0].replace("-","").strip()
+            if item[oem]:
+                v['images'] = []
+                v['Quantity_article'] = int(v['loc01'])+int(v['loc02'])+int(v['loc03'])+int(v['loc04'])+int(v['loc05'])+int(v['loc06'])+int(v['loc07'])+int(v['loc08'])+int(v['loc09'])+int(v['loc10'])+int(v['loc11'])+int(v['loc12'])+int(v['loc13'])+int(v['loc14'])+int(v['loc15'])+int(v['loc16'])+int(v['loc17'])+int(v['loc18'])+int(v['loc19'])+int(v['loc20'])+int(v['loc21'])+int(v['loc22'])+int(v['loc23'])+int(v['loc24'])+int(v['loc25'])+int(v['loc26'])+int(v['loc27'])+int(v['loc28'])+int(v['loc29'])+int(v['loc30'])+int(v['loc31'])+int(v['loc32'])+int(v['loc33'])+int(v['loc34'])+int(v['loc35'])+int(v['loc36'])+int(v['loc37'])+int(v['loc38'])+int(v['loc39'])+int(v['loc40'])
+                v['flag'] = 1
+                if (v['Quantity_article'] != 0) and (v['price2'] != 0):
+                    item[str(oem)].append(v)
+        except:
+            v['images'] = []
+            v['Quantity_article'] = int(v['loc01'])+int(v['loc02'])+int(v['loc03'])+int(v['loc04'])+int(v['loc05'])+int(v['loc06'])+int(v['loc07'])+int(v['loc08'])+int(v['loc09'])+int(v['loc10'])+int(v['loc11'])+int(v['loc12'])+int(v['loc13'])+int(v['loc14'])+int(v['loc15'])+int(v['loc16'])+int(v['loc17'])+int(v['loc18'])+int(v['loc19'])+int(v['loc20'])+int(v['loc21'])+int(v['loc22'])+int(v['loc23'])+int(v['loc24'])+int(v['loc25'])+int(v['loc26'])+int(v['loc27'])+int(v['loc28'])+int(v['loc29'])+int(v['loc30'])+int(v['loc31'])+int(v['loc32'])+int(v['loc33'])+int(v['loc34'])+int(v['loc35'])+int(v['loc36'])+int(v['loc37'])+int(v['loc38'])+int(v['loc39'])+int(v['loc40'])
+            oem = v['ref2'].split(' ')[0].split('/')[0].replace("-","").strip()
+            v['flag'] = 1
+            if (v['Quantity_article'] != 0) and (v['price2'] != 0):
+                item[str(oem)] = [v]
+    return item
+
+def get_data_list(item):
+    data = []
+    for key,value in item:
+        data2 = []
+        data2 = [v for v in item[key]]
+        for d in data2:
+            data.append(d)
+    return data
+
+
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
-@authentication_classes([JWTAuthentication])
+# @permission_classes([IsAuthenticated])
+# @authentication_classes([JWTAuthentication])
+
 def AutoCompleteSuggestions(request,*args,**kwargs):        
         try:
             searchQuery = request.GET.get('searchquery')
             if (searchQuery!=None):
-                operation_name = "getArticles"
+                if len(searchQuery) < 40:                   
+                    search_query_keyword = Eztb3105.objects.filter(Q(stkgencode=searchQuery) | Q(itemid=searchQuery) | Q(ref1=searchQuery) | Q(ref2=searchQuery) | Q(ref3=searchQuery))                    
+                    search_query_keyword_serializer = Eztb3105Serializer(search_query_keyword,many=True)                    
 
-                parameters = {
-                    operation_name: {
-                        'arg0': {
-                            'articleCountry': 'KE',
-                            'provider': int(TECDOC_MANDATOR),
-                            'lang': 'en',
-                            'searchQuery': searchQuery,
-                            'searchMatchType': 'prefix_or_suffix',
-                            'searchType': 10,
-                            'page': 1,
-                            'perPage': 0,
-                            'sort': [
-                                {
-                                    'field': 'score',
-                                    'direction': 'desc',
-                                },
-                                {
-                                    'field': 'mfrName',
-                                    'direction': 'asc',
-                                },
-                                {
-                                    'field': 'linkageSortNum',
-                                    'direction': 'asc',
-                                },
-                            ],
-                            'filterQueries': [
-                                '(dataSupplierId NOT IN (4978,4982))',
-                            ],
-                            'dataSupplierIds': [],
-                            'genericArticleIds': [],
-                            'includeAll': False,
-                            'includeLinkages': True,
-                            'linkagesPerPage': 100,
-                            'includeGenericArticles': True,
-                            'includeArticleCriteria': True,
-                            'includeMisc': True,
-                            'includeImages': True,
-                            'includePDFs': False,
-                            'includeLinks': False,
-                            'includeArticleText': True,
-                            'includeOEMNumbers': False,
-                            'includeReplacedByArticles': True,
-                            'includeReplacesArticles': True,
-                            'includeComparableNumbers': True,
-                            'includeGTINs': True,
-                            'includeTradeNumbers': True,
-                            'includePrices': False,
-                            'includePartsListArticles': False,
-                            'includeAccessoryArticles': False,
-                            'includeArticleLogisticsCriteria': False,
-                            'includeDataSupplierFacets': False,
-                            'includeGenericArticleFacets': True,
-                            'includeCriteriaFacets': False,
-                        },
-                        },
-                        }
+                elif searchQuery.count(' ') > 0:
+                    # Split the input string by spaces
+                    words = searchQuery.split()
+                    # Use a set to remove duplicates and then join the words back together with spaces
+                    new_search_c = ' '.join(set(words))
+                    
+                    new_search_c = re.sub(r'[^a-zA-Z0-9]', ' ', new_search_c).lower()
 
-                json_param = json.dumps(parameters)
-                result = http_json_request('https://webservice.tecalliance.services/pegasus-3-0/services/TecdocToCatDLW.jsonEndpoint', json_param)
+                    # Split the string into a list of words based on spaces
+                    words_new_search_c = new_search_c.split()
 
+                    q_objects = Q()
+                    for word in words_new_search_c:
+                        q_objects &= Q(searchfield__icontains=word)
 
-                generic_articleId = json.loads(result)["genericArticleFacets"]["counts"][0]["genericArticleId"]
-
-                parameters2 = {
-                    operation_name: {
-                        'arg0': {
-                            'articleCountry': 'KE',
-                            'provider': int(TECDOC_MANDATOR),
-                            'lang': 'en',
-                            'searchQuery': searchQuery,
-                            'searchMatchType': 'prefix_or_suffix',
-                            'searchType': 10,
-                            'page': 1,
-                            'perPage': 100,
-                            'sort': [
-                                {
-                                    'field': 'score',
-                                    'direction': 'desc',
-                                },
-                                {
-                                    'field': 'mfrName',
-                                    'direction': 'asc',
-                                },
-                                {
-                                    'field': 'linkageSortNum',
-                                    'direction': 'asc',
-                                },
-                            ],
-                            'filterQueries': [
-                                '(dataSupplierId NOT IN (4978,4982))',
-                            ],
-                            'dataSupplierIds': [],
-                            'genericArticleIds': [
-                                generic_articleId,
-                            ],
-                            'criteriaFilters': [],
-                            'articleStatusIds': [],
-                            'includeAll': False,
-                            'includeLinkages': True,
-                            'linkagesPerPage': 100,
-                            'includeGenericArticles': True,
-                            'includeArticleCriteria': True,
-                            'includeMisc': True,
-                            'includeImages': True,
-                            'includePDFs': True,
-                            'includeLinks': True,
-                            'includeArticleText': True,
-                            'includeOEMNumbers': True,
-                            'includeReplacedByArticles': True,
-                            'includeReplacesArticles': True,
-                            'includeComparableNumbers': True,
-                            'includeGTINs': True,
-                            'includeTradeNumbers': True,
-                            'includePrices': False,
-                            'includePartsListArticles': False,
-                            'includeAccessoryArticles': False,
-                            'includeArticleLogisticsCriteria': True,
-                            'includeDataSupplierFacets': True,
-                            'includeGenericArticleFacets': True,
-                            'includeArticleStatusFacets': True,
-                            'includeCriteriaFacets': True,
-                        },
-                        },
-                        }
-                json_param2 = json.dumps(parameters2)
-                result2 = http_json_request('https://webservice.tecalliance.services/pegasus-3-0/services/TecdocToCatDLW.jsonEndpoint', json_param2)
-
-                # macthed_oem_db = []
-                # already_done = []
-                # for article_list in json.loads(result2)['articles']:
-                #     try:
-                #         if article_list['oemNumbers'][0]['articleNumber'] not in already_done:
-                #             oem_number = article_list['oemNumbers'][0]['articleNumber']
-                #             already_done.append(oem_number)
-                #             if (oem_number!=None):            
-                #                 search_database = Eztb3105.objects.filter(searchfield__icontains=oem_number)
-                #                 search_database_serializer = Eztb3105Serializer(search_database,many=True)                
-                #                 if len(search_database_serializer.data) > 0:
-                #                     for new_loop in search_database_serializer.data:
-                #                         new_data = new_loop.copy()
-                #                         new_data['Quantity_article'] = int(new_data['loc01'])+int(new_data['loc02'])+int(new_data['loc03'])+int(new_data['loc04'])+int(new_data['loc05'])+int(new_data['loc06'])+int(new_data['loc07'])+int(new_data['loc08'])+int(new_data['loc09'])+int(new_data['loc10'])+int(new_data['loc11'])+int(new_data['loc12'])+int(new_data['loc13'])+int(new_data['loc14'])+int(new_data['loc15'])+int(new_data['loc16'])+int(new_data['loc17'])+int(new_data['loc18'])+int(new_data['loc19'])+int(new_data['loc20'])+int(new_data['loc31'])+int(new_data['loc32'])+int(new_data['loc33'])+int(new_data['loc34'])+int(new_data['loc35'])+int(new_data['loc36'])+int(new_data['loc37'])+int(new_data['loc38'])+int(new_data['loc39'])+int(new_data['loc40'])
-                #                         new_data['images'] = article_list['images']
-                #                         macthed_oem_db.append(new_data)
-                #     except:
-                #         oem_number = None
-
-            macthed_oem_db = []
-            already_done = []
-            filter_done = []
-            
-            
-
-            for article_list in json.loads(result2)['articles']:
-                
-                check_point_flag = False             
-                try:                    
-                    for oem_loop in  article_list['oemNumbers']:
-                                              
-                        if oem_loop['articleNumber'] not in already_done:                                                      
-                            oem_number = oem_loop['articleNumber']                           
-                            already_done.append(oem_number)  
-                                                        
-                            if (oem_number!=None) and (check_point_flag == False):
-                                
-                                # search_database = Eztb3105.objects.filter(ref2=oem_number)
-                                search_database = Eztb3105.objects.filter(searchfield__icontains=oem_number)
-                                search_database_serializer = Eztb3105Serializer(search_database,many=True)
-                                
-
-                                if len(search_database_serializer.data) > 0:                                                                    
-                                    find_unique_id = search_database_serializer.data[0].get('uniqueid')
-
-                                    if find_unique_id != 0:                                    
-                                        search_database1 = Eztb3105.objects.filter(uniqueid=find_unique_id)
-                                        search_database_serializer1 = Eztb3105Serializer(search_database1,many=True)
-
-                                        for new_loop in search_database_serializer1.data:
-                                            check_point_flag = True
-                                            new_data = new_loop.copy()
-                                            new_data['Quantity_article'] = int(new_data['loc01'])+int(new_data['loc02'])+int(new_data['loc03'])+int(new_data['loc04'])+int(new_data['loc05'])+int(new_data['loc06'])+int(new_data['loc07'])+int(new_data['loc08'])+int(new_data['loc09'])+int(new_data['loc10'])+int(new_data['loc11'])+int(new_data['loc12'])+int(new_data['loc13'])+int(new_data['loc14'])+int(new_data['loc15'])+int(new_data['loc16'])+int(new_data['loc17'])+int(new_data['loc18'])+int(new_data['loc19'])+int(new_data['loc20'])+int(new_data['loc31'])+int(new_data['loc32'])+int(new_data['loc33'])+int(new_data['loc34'])+int(new_data['loc35'])+int(new_data['loc36'])+int(new_data['loc37'])+int(new_data['loc38'])+int(new_data['loc39'])+int(new_data['loc40'])
-                                            new_data['images'] = article_list['images']                                    
-                                            if new_data['id'] not in filter_done:                                        
-                                                macthed_oem_db.append(new_data)
-                                                filter_done.append(new_data['id'])
-                                    else:
-                                        for new_loop in search_database_serializer.data:
-                                            check_point_flag = True
-                                            new_data = new_loop.copy()
-                                            new_data['Quantity_article'] = int(new_data['loc01'])+int(new_data['loc02'])+int(new_data['loc03'])+int(new_data['loc04'])+int(new_data['loc05'])+int(new_data['loc06'])+int(new_data['loc07'])+int(new_data['loc08'])+int(new_data['loc09'])+int(new_data['loc10'])+int(new_data['loc11'])+int(new_data['loc12'])+int(new_data['loc13'])+int(new_data['loc14'])+int(new_data['loc15'])+int(new_data['loc16'])+int(new_data['loc17'])+int(new_data['loc18'])+int(new_data['loc19'])+int(new_data['loc20'])+int(new_data['loc31'])+int(new_data['loc32'])+int(new_data['loc33'])+int(new_data['loc34'])+int(new_data['loc35'])+int(new_data['loc36'])+int(new_data['loc37'])+int(new_data['loc38'])+int(new_data['loc39'])+int(new_data['loc40'])
-                                            new_data['images'] = article_list['images']                                    
-                                            if new_data['id'] not in filter_done:                                        
-                                                macthed_oem_db.append(new_data)
-                                                filter_done.append(new_data['id'])  
-                                  
+                    # Use Django ORM to retrieve the records
+                    selected_records = Eztb3105.objects.filter(q_objects).values()
+                    search_query_keyword_serializer = Eztb3105Serializer(selected_records,many=True)
+                finale_result = []    
+                try:
+                    oems_numbers = [v['ref2'].split(' ')[0].split('/')[0].replace("-","").strip() for v in search_query_keyword_serializer.data if v['images']==None]
                 except:
-                    oem_number = None
+                    oems_numbers = []
 
+                
+                if len(oems_numbers) > 0:
+                    generic_ids = []
+                    generic_ids_mapping = []
+                    done_oems = []
+                    operation_name = "getArticles"
+                      
+                    for oems_loop in oems_numbers:                                       
+                        if oems_loop not in done_oems:                        
+                            parameters = {
+                                operation_name: {
+                                    'arg0': {
+                                        'articleCountry': 'KE',
+                                        'provider': int(TECDOC_MANDATOR),
+                                        'lang': 'en',
+                                        'searchQuery': oems_loop,
+                                        'searchMatchType': 'prefix_or_suffix',
+                                        'searchType': 10,
+                                        'page': 1,
+                                        'perPage': 0,
+                                        'sort': [
+                                            {
+                                                'field': 'score',
+                                                'direction': 'desc',
+                                            },
+                                            {
+                                                'field': 'mfrName',
+                                                'direction': 'asc',
+                                            },
+                                            {
+                                                'field': 'linkageSortNum',
+                                                'direction': 'asc',
+                                            },
+                                        ],
+                                        'filterQueries': [
+                                            '(dataSupplierId NOT IN (4978,4982))',
+                                        ],
+                                        'dataSupplierIds': [],
+                                        'genericArticleIds': [],
+                                        'includeAll': False,
+                                        'includeLinkages': True,
+                                        'linkagesPerPage': 100,
+                                        'includeGenericArticles': True,
+                                        'includeArticleCriteria': True,
+                                        'includeMisc': True,
+                                        'includeImages': True,
+                                        'includePDFs': False,
+                                        'includeLinks': False,
+                                        'includeArticleText': True,
+                                        'includeOEMNumbers': False,
+                                        'includeReplacedByArticles': True,
+                                        'includeReplacesArticles': True,
+                                        'includeComparableNumbers': True,
+                                        'includeGTINs': True,
+                                        'includeTradeNumbers': True,
+                                        'includePrices': False,
+                                        'includePartsListArticles': False,
+                                        'includeAccessoryArticles': False,
+                                        'includeArticleLogisticsCriteria': False,
+                                        'includeDataSupplierFacets': False,
+                                        'includeGenericArticleFacets': True,
+                                        'includeCriteriaFacets': False,
+                                    },
+                                    },
+                                    }
+
+                            json_param = json.dumps(parameters)
+                            result = http_json_request('https://webservice.tecalliance.services/pegasus-3-0/services/TecdocToCatDLW.jsonEndpoint', json_param)
+                            try:
+                                generic_articleId = json.loads(result)["genericArticleFacets"]["counts"][0]["genericArticleId"]                            
+                                if generic_articleId not in generic_ids:
+                                    item_generic_mapping = dict()
+                                    item_generic_mapping['generic_id'] = generic_articleId
+                                    item_generic_mapping['oem'] = oems_loop
+                                    
+                                    generic_ids_mapping.append(item_generic_mapping)
+
+                                    generic_ids.append(generic_articleId)
+                            except Exception as E:                      
+                                print(E)
+                            done_oems.append(oems_loop)
+                       
+                    if len(generic_ids) > 0:                    
+                        parameters2 = {
+                            operation_name: {
+                                'arg0': {
+                                    'articleCountry': 'KE',
+                                    'provider': int(TECDOC_MANDATOR),
+                                    'lang': 'en',
+                                    'searchQuery': searchQuery,
+                                    'searchMatchType': 'prefix_or_suffix',
+                                    'searchType': 10,
+                                    'page': 1,
+                                    'perPage': 100,
+                                    'sort': [
+                                        {
+                                            'field': 'score',
+                                            'direction': 'desc',
+                                        },
+                                        {
+                                            'field': 'mfrName',
+                                            'direction': 'asc',
+                                        },
+                                        {
+                                            'field': 'linkageSortNum',
+                                            'direction': 'asc',
+                                        },
+                                    ],
+                                    'filterQueries': [
+                                        '(dataSupplierId NOT IN (4978,4982))',
+                                    ],
+                                    'dataSupplierIds': [],
+                                    'genericArticleIds': generic_ids,
+                                    'criteriaFilters': [],
+                                    'articleStatusIds': [],
+                                    'includeAll': False,
+                                    'includeLinkages': True,
+                                    'linkagesPerPage': 100,
+                                    'includeGenericArticles': True,
+                                    'includeArticleCriteria': True,
+                                    'includeMisc': True,
+                                    'includeImages': True,
+                                    'includePDFs': True,
+                                    'includeLinks': True,
+                                    'includeArticleText': True,
+                                    'includeOEMNumbers': True,
+                                    'includeReplacedByArticles': True,
+                                    'includeReplacesArticles': True,
+                                    'includeComparableNumbers': True,
+                                    'includeGTINs': True,
+                                    'includeTradeNumbers': True,
+                                    'includePrices': False,
+                                    'includePartsListArticles': False,
+                                    'includeAccessoryArticles': False,
+                                    'includeArticleLogisticsCriteria': True,
+                                    'includeDataSupplierFacets': True,
+                                    'includeGenericArticleFacets': True,
+                                    'includeArticleStatusFacets': True,
+                                    'includeCriteriaFacets': True,
+                                },
+                                },
+                                }           
+
+                        json_param2 = json.dumps(parameters2)
+                        result2 = http_json_request('https://webservice.tecalliance.services/pegasus-3-0/services/TecdocToCatDLW.jsonEndpoint', json_param2)
+
+                        update_dones = []
+                        
+                                        
+                        for loop_db_image in search_query_keyword_serializer.data:
                             
+                            check_quantity = int(loop_db_image['loc01'])+int(loop_db_image['loc02'])+int(loop_db_image['loc03'])+int(loop_db_image['loc04'])+int(loop_db_image['loc05'])+int(loop_db_image['loc06'])+int(loop_db_image['loc07'])+int(loop_db_image['loc08'])+int(loop_db_image['loc09'])+int(loop_db_image['loc10'])+int(loop_db_image['loc11'])+int(loop_db_image['loc12'])+int(loop_db_image['loc13'])+int(loop_db_image['loc14'])+int(loop_db_image['loc15'])+int(loop_db_image['loc16'])+int(loop_db_image['loc17'])+int(loop_db_image['loc18'])+int(loop_db_image['loc19'])+int(loop_db_image['loc20'])+int(loop_db_image['loc21'])+int(loop_db_image['loc22'])+int(loop_db_image['loc23'])+int(loop_db_image['loc24'])+int(loop_db_image['loc25'])+int(loop_db_image['loc26'])+int(loop_db_image['loc27'])+int(loop_db_image['loc28'])+int(loop_db_image['loc29'])+int(loop_db_image['loc30'])+int(loop_db_image['loc31'])+int(loop_db_image['loc32'])+int(loop_db_image['loc33'])+int(loop_db_image['loc34'])+int(loop_db_image['loc35'])+int(loop_db_image['loc36'])+int(loop_db_image['loc37'])+int(loop_db_image['loc38'])+int(loop_db_image['loc39'])+int(loop_db_image['loc40'])                        
+                            check_price = loop_db_image['price2']
+                            check_point_flag = False
+                            
+                            if (check_quantity != 0) and (check_price != 0):
+                                
+                                matched_done = []
+                                seperator =json.loads(result2)['articles']
+                                
+                                for generic_ids_map in seperator:                                
+                                    for inner_images in generic_ids_map['oemNumbers']:                                    
+                                        if (inner_images['articleNumber'] not in matched_done) and (loop_db_image['ref2'].split(' ')[0].split('/')[0].replace("-","").strip().lower() ==  inner_images['articleNumber'].split('/')[0].replace("-","").replace(" ","").strip().lower()  ) :
+                                                                                 
+                                            try:                                            
+                                                if len(generic_ids_map['images'])> 0:
+                                                                                                 
+                                                    loop_db_image['images']=copy.copy(generic_ids_map['images'])
+                                                    
+                                                    loop_db_image['Quantity_article'] = int(loop_db_image['loc01'])+int(loop_db_image['loc02'])+int(loop_db_image['loc03'])+int(loop_db_image['loc04'])+int(loop_db_image['loc05'])+int(loop_db_image['loc06'])+int(loop_db_image['loc07'])+int(loop_db_image['loc08'])+int(loop_db_image['loc09'])+int(loop_db_image['loc10'])+int(loop_db_image['loc11'])+int(loop_db_image['loc12'])+int(loop_db_image['loc13'])+int(loop_db_image['loc14'])+int(loop_db_image['loc15'])+int(loop_db_image['loc16'])+int(loop_db_image['loc17'])+int(loop_db_image['loc18'])+int(loop_db_image['loc19'])+int(loop_db_image['loc20'])+int(loop_db_image['loc21'])+int(loop_db_image['loc22'])+int(loop_db_image['loc23'])+int(loop_db_image['loc24'])+int(loop_db_image['loc25'])+int(loop_db_image['loc26'])+int(loop_db_image['loc27'])+int(loop_db_image['loc28'])+int(loop_db_image['loc29'])+int(loop_db_image['loc30'])+int(loop_db_image['loc31'])+int(loop_db_image['loc32'])+int(loop_db_image['loc33'])+int(loop_db_image['loc34'])+int(loop_db_image['loc35'])+int(loop_db_image['loc36'])+int(loop_db_image['loc37'])+int(loop_db_image['loc38'])+int(loop_db_image['loc39'])+int(loop_db_image['loc40'])                                                
+                                                                                            
+                                                    finale_result.append(copy.copy(loop_db_image))
+                                                                                        
+                                                    check_point_flag = True
+                                                    matched_done.append(inner_images['articleNumber'])
+                                            except:
+                                                print('i am exception')
+                                        if check_point_flag == True:
+                                            break
+                                    if check_point_flag == True:
+                                            if (loop_db_image['ref2'] not in update_dones) and (loop_db_image['ref2'].split(' ')[0].split('/')[0].replace("-","").strip() in oems_numbers):
+                                                
+                                                update_images = Eztb3105.objects.filter(ref2=loop_db_image['ref2'])
+                                                for update_images_loop in update_images:
+                                                    update_images_loop.images = copy.copy(generic_ids_map['images'])
+                                                    update_images_loop.save()                                                    
+                                                                                                                                           
+                                                update_dones.append(loop_db_image['ref2'])  
+                                            break    
+                                                
+                                                                                
+                            if check_point_flag == False:                            
+                                loop_db_image['images'] = []
+                                loop_db_image['Quantity_article'] = int(loop_db_image['loc01'])+int(loop_db_image['loc02'])+int(loop_db_image['loc03'])+int(loop_db_image['loc04'])+int(loop_db_image['loc05'])+int(loop_db_image['loc06'])+int(loop_db_image['loc07'])+int(loop_db_image['loc08'])+int(loop_db_image['loc09'])+int(loop_db_image['loc10'])+int(loop_db_image['loc11'])+int(loop_db_image['loc12'])+int(loop_db_image['loc13'])+int(loop_db_image['loc14'])+int(loop_db_image['loc15'])+int(loop_db_image['loc16'])+int(loop_db_image['loc17'])+int(loop_db_image['loc18'])+int(loop_db_image['loc19'])+int(loop_db_image['loc20'])+int(loop_db_image['loc21'])+int(loop_db_image['loc22'])+int(loop_db_image['loc23'])+int(loop_db_image['loc24'])+int(loop_db_image['loc25'])+int(loop_db_image['loc26'])+int(loop_db_image['loc27'])+int(loop_db_image['loc28'])+int(loop_db_image['loc29'])+int(loop_db_image['loc30'])+int(loop_db_image['loc31'])+int(loop_db_image['loc32'])+int(loop_db_image['loc33'])+int(loop_db_image['loc34'])+int(loop_db_image['loc35'])+int(loop_db_image['loc36'])+int(loop_db_image['loc37'])+int(loop_db_image['loc38'])+int(loop_db_image['loc39'])+int(loop_db_image['loc40'])
+                                if (loop_db_image['Quantity_article'] != 0) and (loop_db_image['price2'] != 0):
+                                    finale_result.append(loop_db_image)         
+                                
+                    else:
+                        for loop_db_image in search_query_keyword_serializer.data:
+                            if loop_db_image['images']==None:                    
+                                loop_db_image['images']=[]                                            
+                                loop_db_image['Quantity_article'] = int(loop_db_image['loc01'])+int(loop_db_image['loc02'])+int(loop_db_image['loc03'])+int(loop_db_image['loc04'])+int(loop_db_image['loc05'])+int(loop_db_image['loc06'])+int(loop_db_image['loc07'])+int(loop_db_image['loc08'])+int(loop_db_image['loc09'])+int(loop_db_image['loc10'])+int(loop_db_image['loc11'])+int(loop_db_image['loc12'])+int(loop_db_image['loc13'])+int(loop_db_image['loc14'])+int(loop_db_image['loc15'])+int(loop_db_image['loc16'])+int(loop_db_image['loc17'])+int(loop_db_image['loc18'])+int(loop_db_image['loc19'])+int(loop_db_image['loc20'])+int(loop_db_image['loc21'])+int(loop_db_image['loc22'])+int(loop_db_image['loc23'])+int(loop_db_image['loc24'])+int(loop_db_image['loc25'])+int(loop_db_image['loc26'])+int(loop_db_image['loc27'])+int(loop_db_image['loc28'])+int(loop_db_image['loc29'])+int(loop_db_image['loc30'])+int(loop_db_image['loc31'])+int(loop_db_image['loc32'])+int(loop_db_image['loc33'])+int(loop_db_image['loc34'])+int(loop_db_image['loc35'])+int(loop_db_image['loc36'])+int(loop_db_image['loc37'])+int(loop_db_image['loc38'])+int(loop_db_image['loc39'])+int(loop_db_image['loc40'])
+                                if (loop_db_image['Quantity_article'] !=0) and (loop_db_image['price2']!=0):                                                                
+                                    finale_result.append(copy.copy(loop_db_image))
+                
+                for again_else_loop in search_query_keyword_serializer.data:
+                    
+                    if again_else_loop['ref2'].split(' ')[0].split('/')[0].replace("-","").strip() not in oems_numbers:
+                        again_else_loop['Quantity_article'] = int(again_else_loop['loc01'])+int(again_else_loop['loc02'])+int(again_else_loop['loc03'])+int(again_else_loop['loc04'])+int(again_else_loop['loc05'])+int(again_else_loop['loc06'])+int(again_else_loop['loc07'])+int(again_else_loop['loc08'])+int(again_else_loop['loc09'])+int(again_else_loop['loc10'])+int(again_else_loop['loc11'])+int(again_else_loop['loc12'])+int(again_else_loop['loc13'])+int(again_else_loop['loc14'])+int(again_else_loop['loc15'])+int(again_else_loop['loc16'])+int(again_else_loop['loc17'])+int(again_else_loop['loc18'])+int(again_else_loop['loc19'])+int(again_else_loop['loc20'])+int(again_else_loop['loc21'])+int(again_else_loop['loc22'])+int(again_else_loop['loc23'])+int(again_else_loop['loc24'])+int(again_else_loop['loc25'])+int(again_else_loop['loc26'])+int(again_else_loop['loc27'])+int(again_else_loop['loc28'])+int(again_else_loop['loc29'])+int(again_else_loop['loc30'])+int(again_else_loop['loc31'])+int(again_else_loop['loc32'])+int(again_else_loop['loc33'])+int(again_else_loop['loc34'])+int(again_else_loop['loc35'])+int(again_else_loop['loc36'])+int(again_else_loop['loc37'])+int(again_else_loop['loc38'])+int(again_else_loop['loc39'])+int(again_else_loop['loc40'])
+                        if (again_else_loop['Quantity_article'] !=0) and (again_else_loop['price2']!=0) : 
+                            finale_result.append(again_else_loop)
 
-                return Response({'parts':macthed_oem_db})
 
+                    
+                
+                return Response({'parts':finale_result})
             else:
                 return Response({'error':'searchQuery not found'})
+
+            
         except Exception as E:            
-            print(E)
+            print("rooly",E)                        
             return Response({'error':'something went wrong'})        
 
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-@authentication_classes([JWTAuthentication])
-def AutoCompleteSuggestions_two(request,*args,**kwargs):
-    try:
-        searchQuery = request.GET.get('searchquery')
-        if (searchQuery!=None):
-            print('--------------------')
-            print(searchQuery)
-            print('--------------------')
-            macthed_oem_db =[]
-            search_database = Eztb3105.objects.filter(searchfield__icontains=searchQuery)
-            # search_database = Eztb3105.objects.filter(searchfield__icontains=oem_number)
-            search_database_serializer = Eztb3105Serializer(search_database,many=True)
-            if len(search_database_serializer.data) > 0:                                                                    
-
-                for new_loop in search_database_serializer.data:
-                    new_data = new_loop.copy()
-                    new_data['Quantity_article'] = int(new_data['loc01'])+int(new_data['loc02'])+int(new_data['loc03'])+int(new_data['loc04'])+int(new_data['loc05'])+int(new_data['loc06'])+int(new_data['loc07'])+int(new_data['loc08'])+int(new_data['loc09'])+int(new_data['loc10'])+int(new_data['loc11'])+int(new_data['loc12'])+int(new_data['loc13'])+int(new_data['loc14'])+int(new_data['loc15'])+int(new_data['loc16'])+int(new_data['loc17'])+int(new_data['loc18'])+int(new_data['loc19'])+int(new_data['loc20'])+int(new_data['loc31'])+int(new_data['loc32'])+int(new_data['loc33'])+int(new_data['loc34'])+int(new_data['loc35'])+int(new_data['loc36'])+int(new_data['loc37'])+int(new_data['loc38'])+int(new_data['loc39'])+int(new_data['loc40'])                                       
-                    macthed_oem_db.append(new_data)
-
-                return Response({'parts':macthed_oem_db})
-        else:
-            return Response({'error':'searchQuery not found'})
-            
-            
-    except:
-        return Response({'error':'something went wrong'})        
 
 
 @api_view(['GET'])

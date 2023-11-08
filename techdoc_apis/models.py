@@ -313,7 +313,7 @@ class Eztb3105(models.Model):
     invpricerulq = models.TextField(db_column='InvPriceRulQ', blank=True, null=True)  # Field name made lowercase.
     cshpricerul = models.TextField(db_column='CshPriceRul', blank=True, null=True)  # Field name made lowercase.
     cshpricerulq = models.TextField(db_column='CshPriceRulQ', blank=True, null=True)  # Field name made lowercase.
-
+    images = models.TextField(db_column='Images', blank=True, null=True)  # Field name made lowercase.
     class Meta:
         managed = False
         db_table = 'eztb3105'
