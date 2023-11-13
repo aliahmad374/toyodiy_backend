@@ -44,8 +44,8 @@ def http_json_request(service_url, json_param):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
-@authentication_classes([JWTAuthentication])
+# @permission_classes([IsAuthenticated])
+# @authentication_classes([JWTAuthentication])
 def find_manufactures(request, *args, **kwargs):
     try:
         operation_name = "getManufacturers2"
@@ -74,8 +74,8 @@ def find_manufactures(request, *args, **kwargs):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
-@authentication_classes([JWTAuthentication])
+# @permission_classes([IsAuthenticated])
+# @authentication_classes([JWTAuthentication])
 def find_model(request, *args, **kwargs):
     try:
         mfid = request.GET.get('mfid')
@@ -111,8 +111,8 @@ def find_model(request, *args, **kwargs):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
-@authentication_classes([JWTAuthentication])
+# @permission_classes([IsAuthenticated])
+# @authentication_classes([JWTAuthentication])
 def find_type(request, *args, **kwargs):
     try:
         mfid = request.GET.get('mfid')  
@@ -154,8 +154,8 @@ def find_type(request, *args, **kwargs):
         return Response({'error':'something went wrong'})    
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
-@authentication_classes([JWTAuthentication])
+# @permission_classes([IsAuthenticated])
+# @authentication_classes([JWTAuthentication])
 def find_sidebar(request, *args, **kwargs):
     try:
         linkageTargetIds = request.GET.get('linkageTargetIds')
@@ -189,8 +189,8 @@ def find_sidebar(request, *args, **kwargs):
         return Response({'error':'something went wrong'})
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
-@authentication_classes([JWTAuthentication])
+# @permission_classes([IsAuthenticated])
+# @authentication_classes([JWTAuthentication])
 def find_categories_subcategories(request, *args, **kwargs):
     try:
         linkageTargetIds = request.GET.get('linkageTargetIds')
@@ -278,8 +278,8 @@ def find_categories_subcategories(request, *args, **kwargs):
         return Response({'error':'something went wrong'})
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
-@authentication_classes([JWTAuthentication])
+# @permission_classes([IsAuthenticated])
+# @authentication_classes([JWTAuthentication])
 def find_subcategories_subcategories(request, *args, **kwargs):
     try:
         selected_subcategory = request.GET.get('selected_subcategory')
@@ -326,8 +326,8 @@ def find_subcategories_subcategories(request, *args, **kwargs):
 
     
 @api_view(['GET'])    
-@permission_classes([IsAuthenticated])
-@authentication_classes([JWTAuthentication])
+# @permission_classes([IsAuthenticated])
+# @authentication_classes([JWTAuthentication])
 def find_articles_from_categories(request,*args,**kwargs):
     try:
         linkageTargetIds = request.GET.get('linkageTargetIds')
@@ -669,8 +669,8 @@ def find_articles_from_categories(request,*args,**kwargs):
         return Response({'error':'something went wrong'})
 
 @api_view(['GET'])    
-@permission_classes([IsAuthenticated])
-@authentication_classes([JWTAuthentication])
+# @permission_classes([IsAuthenticated])
+# @authentication_classes([JWTAuthentication])
 def find_article_information(request,*args,**kwargs):
     try:
         searchQuery = request.GET.get('searchquery')
@@ -701,13 +701,6 @@ def find_article_information(request,*args,**kwargs):
             return Response({'error':'SearchQuery not found'})
     except:
         return Response({'error':'something went wrong'})    
-
-
-
-
-
-
-
 
 
 
@@ -773,7 +766,8 @@ def AutoCompleteSuggestions(request,*args,**kwargs):
                     search_query_keyword_serializer = Eztb3105Serializer(selected_records,many=True)
                 finale_result = []    
                 try:
-                    oems_numbers = [v['ref2'].split(' ')[0].split('/')[0].replace("-","").strip() for v in search_query_keyword_serializer.data if v['images']==None]
+                    oems_numbers = [v['ref2'] for v in search_query_keyword_serializer.data if v['images']==None]
+                    print(oems_numbers)
                 except:
                     oems_numbers = []
 
@@ -856,9 +850,9 @@ def AutoCompleteSuggestions(request,*args,**kwargs):
 
                                     generic_ids.append(generic_articleId)
                             except Exception as E:                      
-                                print(E)
+                                print('Generic index',E)
                             done_oems.append(oems_loop)
-                       
+                    print(generic_ids)   
                     if len(generic_ids) > 0:                    
                         parameters2 = {
                             operation_name: {
@@ -925,29 +919,34 @@ def AutoCompleteSuggestions(request,*args,**kwargs):
 
                         update_dones = []
                         
-                                        
+                        print('search query data',[v['ref2'] for v in search_query_keyword_serializer.data])                
                         for loop_db_image in search_query_keyword_serializer.data:
                             
                             check_quantity = int(loop_db_image['loc01'])+int(loop_db_image['loc02'])+int(loop_db_image['loc03'])+int(loop_db_image['loc04'])+int(loop_db_image['loc05'])+int(loop_db_image['loc06'])+int(loop_db_image['loc07'])+int(loop_db_image['loc08'])+int(loop_db_image['loc09'])+int(loop_db_image['loc10'])+int(loop_db_image['loc11'])+int(loop_db_image['loc12'])+int(loop_db_image['loc13'])+int(loop_db_image['loc14'])+int(loop_db_image['loc15'])+int(loop_db_image['loc16'])+int(loop_db_image['loc17'])+int(loop_db_image['loc18'])+int(loop_db_image['loc19'])+int(loop_db_image['loc20'])+int(loop_db_image['loc21'])+int(loop_db_image['loc22'])+int(loop_db_image['loc23'])+int(loop_db_image['loc24'])+int(loop_db_image['loc25'])+int(loop_db_image['loc26'])+int(loop_db_image['loc27'])+int(loop_db_image['loc28'])+int(loop_db_image['loc29'])+int(loop_db_image['loc30'])+int(loop_db_image['loc31'])+int(loop_db_image['loc32'])+int(loop_db_image['loc33'])+int(loop_db_image['loc34'])+int(loop_db_image['loc35'])+int(loop_db_image['loc36'])+int(loop_db_image['loc37'])+int(loop_db_image['loc38'])+int(loop_db_image['loc39'])+int(loop_db_image['loc40'])                        
                             check_price = loop_db_image['price2']
                             check_point_flag = False
                             
-                            if (check_quantity != 0) and (check_price != 0):
+                            if (check_quantity != 0) and (check_price != 0) and (loop_db_image['images']==None):
+                                print('i am here for price')
                                 
                                 matched_done = []
                                 seperator =json.loads(result2)['articles']
+
+                                print(len(seperator))
                                 
                                 for generic_ids_map in seperator:                                
-                                    for inner_images in generic_ids_map['oemNumbers']:                                    
-                                        if (inner_images['articleNumber'] not in matched_done) and (loop_db_image['ref2'].split(' ')[0].split('/')[0].replace("-","").strip().lower() ==  inner_images['articleNumber'].split('/')[0].replace("-","").replace(" ","").strip().lower()  ) :
+                                    for inner_images in generic_ids_map['oemNumbers']:
+                                        print("ref2 matching",loop_db_image['ref2'].strip().lower())                                    
+                                        print("articleNumber matching",inner_images['articleNumber'].strip().lower())                                    
+                                        if (inner_images['articleNumber'] not in matched_done) and (loop_db_image['ref2'].strip().lower() ==  inner_images['articleNumber'].strip().lower()  ) :
                                                                                  
                                             try:                                            
                                                 if len(generic_ids_map['images'])> 0:
                                                                                                  
-                                                    loop_db_image['images']=copy.copy(generic_ids_map['images'])
+                                                    loop_db_image['images']=str(copy.copy(generic_ids_map['images']))
                                                     
                                                     loop_db_image['Quantity_article'] = int(loop_db_image['loc01'])+int(loop_db_image['loc02'])+int(loop_db_image['loc03'])+int(loop_db_image['loc04'])+int(loop_db_image['loc05'])+int(loop_db_image['loc06'])+int(loop_db_image['loc07'])+int(loop_db_image['loc08'])+int(loop_db_image['loc09'])+int(loop_db_image['loc10'])+int(loop_db_image['loc11'])+int(loop_db_image['loc12'])+int(loop_db_image['loc13'])+int(loop_db_image['loc14'])+int(loop_db_image['loc15'])+int(loop_db_image['loc16'])+int(loop_db_image['loc17'])+int(loop_db_image['loc18'])+int(loop_db_image['loc19'])+int(loop_db_image['loc20'])+int(loop_db_image['loc21'])+int(loop_db_image['loc22'])+int(loop_db_image['loc23'])+int(loop_db_image['loc24'])+int(loop_db_image['loc25'])+int(loop_db_image['loc26'])+int(loop_db_image['loc27'])+int(loop_db_image['loc28'])+int(loop_db_image['loc29'])+int(loop_db_image['loc30'])+int(loop_db_image['loc31'])+int(loop_db_image['loc32'])+int(loop_db_image['loc33'])+int(loop_db_image['loc34'])+int(loop_db_image['loc35'])+int(loop_db_image['loc36'])+int(loop_db_image['loc37'])+int(loop_db_image['loc38'])+int(loop_db_image['loc39'])+int(loop_db_image['loc40'])                                                
-                                                                                            
+                                                    print('final appending')                                        
                                                     finale_result.append(copy.copy(loop_db_image))
                                                                                         
                                                     check_point_flag = True
@@ -957,36 +956,43 @@ def AutoCompleteSuggestions(request,*args,**kwargs):
                                         if check_point_flag == True:
                                             break
                                     if check_point_flag == True:
-                                            if (loop_db_image['ref2'] not in update_dones) and (loop_db_image['ref2'].split(' ')[0].split('/')[0].replace("-","").strip() in oems_numbers):
+                                            if (loop_db_image['ref2'] not in update_dones) and (loop_db_image['ref2'] in oems_numbers):
                                                 
-                                                update_images = Eztb3105.objects.filter(ref2=loop_db_image['ref2'])
-                                                for update_images_loop in update_images:
-                                                    update_images_loop.images = copy.copy(generic_ids_map['images'])
-                                                    update_images_loop.save()                                                    
+                                                Eztb3105.objects.filter(ref2=loop_db_image['ref2']).update(images=generic_ids_map['images'])
+                                                print('done updation')
+                                                # for update_images_loop in update_images:
+                                                #     update_images_loop.images = copy.copy(generic_ids_map['images'])
+                                                #     update_images_loop.save()                                                    
                                                                                                                                            
                                                 update_dones.append(loop_db_image['ref2'])  
                                             break    
                                                 
                                                                                 
-                            if check_point_flag == False:                            
-                                loop_db_image['images'] = []
+                            if check_point_flag == False and (loop_db_image['images']==None):                            
+                                loop_db_image['images'] = str([])
                                 loop_db_image['Quantity_article'] = int(loop_db_image['loc01'])+int(loop_db_image['loc02'])+int(loop_db_image['loc03'])+int(loop_db_image['loc04'])+int(loop_db_image['loc05'])+int(loop_db_image['loc06'])+int(loop_db_image['loc07'])+int(loop_db_image['loc08'])+int(loop_db_image['loc09'])+int(loop_db_image['loc10'])+int(loop_db_image['loc11'])+int(loop_db_image['loc12'])+int(loop_db_image['loc13'])+int(loop_db_image['loc14'])+int(loop_db_image['loc15'])+int(loop_db_image['loc16'])+int(loop_db_image['loc17'])+int(loop_db_image['loc18'])+int(loop_db_image['loc19'])+int(loop_db_image['loc20'])+int(loop_db_image['loc21'])+int(loop_db_image['loc22'])+int(loop_db_image['loc23'])+int(loop_db_image['loc24'])+int(loop_db_image['loc25'])+int(loop_db_image['loc26'])+int(loop_db_image['loc27'])+int(loop_db_image['loc28'])+int(loop_db_image['loc29'])+int(loop_db_image['loc30'])+int(loop_db_image['loc31'])+int(loop_db_image['loc32'])+int(loop_db_image['loc33'])+int(loop_db_image['loc34'])+int(loop_db_image['loc35'])+int(loop_db_image['loc36'])+int(loop_db_image['loc37'])+int(loop_db_image['loc38'])+int(loop_db_image['loc39'])+int(loop_db_image['loc40'])
                                 if (loop_db_image['Quantity_article'] != 0) and (loop_db_image['price2'] != 0):
+                                    print('finale_result 2')
                                     finale_result.append(loop_db_image)         
                                 
                     else:
                         for loop_db_image in search_query_keyword_serializer.data:
+                            print('i am else')
                             if loop_db_image['images']==None:                    
-                                loop_db_image['images']=[]                                            
+                                loop_db_image['images']=str([])
                                 loop_db_image['Quantity_article'] = int(loop_db_image['loc01'])+int(loop_db_image['loc02'])+int(loop_db_image['loc03'])+int(loop_db_image['loc04'])+int(loop_db_image['loc05'])+int(loop_db_image['loc06'])+int(loop_db_image['loc07'])+int(loop_db_image['loc08'])+int(loop_db_image['loc09'])+int(loop_db_image['loc10'])+int(loop_db_image['loc11'])+int(loop_db_image['loc12'])+int(loop_db_image['loc13'])+int(loop_db_image['loc14'])+int(loop_db_image['loc15'])+int(loop_db_image['loc16'])+int(loop_db_image['loc17'])+int(loop_db_image['loc18'])+int(loop_db_image['loc19'])+int(loop_db_image['loc20'])+int(loop_db_image['loc21'])+int(loop_db_image['loc22'])+int(loop_db_image['loc23'])+int(loop_db_image['loc24'])+int(loop_db_image['loc25'])+int(loop_db_image['loc26'])+int(loop_db_image['loc27'])+int(loop_db_image['loc28'])+int(loop_db_image['loc29'])+int(loop_db_image['loc30'])+int(loop_db_image['loc31'])+int(loop_db_image['loc32'])+int(loop_db_image['loc33'])+int(loop_db_image['loc34'])+int(loop_db_image['loc35'])+int(loop_db_image['loc36'])+int(loop_db_image['loc37'])+int(loop_db_image['loc38'])+int(loop_db_image['loc39'])+int(loop_db_image['loc40'])
                                 if (loop_db_image['Quantity_article'] !=0) and (loop_db_image['price2']!=0):                                                                
                                     finale_result.append(copy.copy(loop_db_image))
-                
+                print('final result length',len(finale_result))
+                print(oems_numbers)
                 for again_else_loop in search_query_keyword_serializer.data:
-                    
-                    if again_else_loop['ref2'].split(' ')[0].split('/')[0].replace("-","").strip() not in oems_numbers:
+                    print('i am printing')
+                    if again_else_loop['ref2'] not in oems_numbers:                        
                         again_else_loop['Quantity_article'] = int(again_else_loop['loc01'])+int(again_else_loop['loc02'])+int(again_else_loop['loc03'])+int(again_else_loop['loc04'])+int(again_else_loop['loc05'])+int(again_else_loop['loc06'])+int(again_else_loop['loc07'])+int(again_else_loop['loc08'])+int(again_else_loop['loc09'])+int(again_else_loop['loc10'])+int(again_else_loop['loc11'])+int(again_else_loop['loc12'])+int(again_else_loop['loc13'])+int(again_else_loop['loc14'])+int(again_else_loop['loc15'])+int(again_else_loop['loc16'])+int(again_else_loop['loc17'])+int(again_else_loop['loc18'])+int(again_else_loop['loc19'])+int(again_else_loop['loc20'])+int(again_else_loop['loc21'])+int(again_else_loop['loc22'])+int(again_else_loop['loc23'])+int(again_else_loop['loc24'])+int(again_else_loop['loc25'])+int(again_else_loop['loc26'])+int(again_else_loop['loc27'])+int(again_else_loop['loc28'])+int(again_else_loop['loc29'])+int(again_else_loop['loc30'])+int(again_else_loop['loc31'])+int(again_else_loop['loc32'])+int(again_else_loop['loc33'])+int(again_else_loop['loc34'])+int(again_else_loop['loc35'])+int(again_else_loop['loc36'])+int(again_else_loop['loc37'])+int(again_else_loop['loc38'])+int(again_else_loop['loc39'])+int(again_else_loop['loc40'])
-                        if (again_else_loop['Quantity_article'] !=0) and (again_else_loop['price2']!=0) : 
+                        print('Ref2',again_else_loop['ref2'])
+                        print('Quantity',again_else_loop['Quantity_article'])
+                        if (again_else_loop['Quantity_article'] !=0) and (again_else_loop['price2']!=0) :
+                            print('i am printing price') 
                             finale_result.append(again_else_loop)
 
 
@@ -1004,8 +1010,8 @@ def AutoCompleteSuggestions(request,*args,**kwargs):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
-@authentication_classes([JWTAuthentication])
+# @permission_classes([IsAuthenticated])
+# @authentication_classes([JWTAuthentication])
 def SearchByVINNumber(request,*args,**kwargs):
     try:
         vinnumber = request.GET.get('vinnumber')
@@ -1034,8 +1040,8 @@ def SearchByVINNumber(request,*args,**kwargs):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
-@authentication_classes([JWTAuthentication])
+# @permission_classes([IsAuthenticated])
+# @authentication_classes([JWTAuthentication])
 def allpartCategories(request,*args,**kwargs):     
      try:
         operation_name = "getArticles"
@@ -1080,8 +1086,8 @@ def allpartCategories(request,*args,**kwargs):
  
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
-@authentication_classes([JWTAuthentication])
+# @permission_classes([IsAuthenticated])
+# @authentication_classes([JWTAuthentication])
 def allpartSubCategories(request,*args,**kwargs):
     try:
         selected_subcategory = request.GET.get('selected_subcategory')
@@ -1328,8 +1334,8 @@ def epc_scraper_data(manufacture,framenumber):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
-@authentication_classes([JWTAuthentication])
+# @permission_classes([IsAuthenticated])
+# @authentication_classes([JWTAuthentication])
 def searchbyframenumber(request,*args,**kwargs):
     try:   
         framenumber = request.GET.get('framenumber').lower()
