@@ -64,7 +64,36 @@ class CreateOrderView(APIView):
         except Exception as E:
             print(E)
             return Response({'error':'something went wrong'},status=status.HTTP_400_BAD_REQUEST)
-        
+
+class CreateNotLoginOrderView(APIView):    
+    def post(self,request,format=None):
+        try:
+            requested_data  = request.data
+            requested_data['order_id'] = create_order_id()
+            requested_data['order_status'] = "in progress"
+            # requested_data['email'] = request.user.email
+            
+            order_list = requested_data['order_list']
+            del requested_data['order_list']
+            print(requested_data)
+            serializer = CartOrderSerializer(data=requested_data)
+            if serializer.is_valid(raise_exception=True):
+                value = serializer.save()
+                for product_loop in order_list:
+                    product_loop['order_id'] = value.id
+                    product_loop['total_price']  = product_loop['price'] * product_loop['product_quantity']
+                    serializer_products = CartProductSerializer(data=product_loop)
+                    if serializer_products.is_valid(raise_exception=True):                        
+                        serializer_products.save()
+
+
+                send_verification_email(requested_data['email'],requested_data['first_name'],requested_data['order_id'],"user")    
+                send_verification_email('alioffice374@gmail.com',requested_data['first_name'],requested_data['order_id'],"admin")
+                return Response({'success':'success'},status=status.HTTP_200_OK)
+        except Exception as E:
+            print(E)
+            return Response({'error':'something went wrong'},status=status.HTTP_400_BAD_REQUEST)
+
 class SearchOrderView(APIView):
     renderer_classes = [UserRenderer]
     permission_classes = [IsAuthenticated]
