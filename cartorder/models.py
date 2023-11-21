@@ -35,3 +35,25 @@ class CartProduct(models.Model):
         return f"{self.product_name} - {self.order.order_id}"
     class Meta:
         db_table = 'products'
+
+class payment_response(models.Model):
+    merchant_request_id = models.CharField(max_length=50)
+    checkout_request_id = models.CharField(max_length=50)
+    response_code = models.CharField(max_length=10)
+    response_description = models.TextField()
+    customer_message = models.TextField()
+    class Meta:
+        db_table = 'PaymentResponse'
+
+
+class payment_callback(models.Model):
+    merchant_request_id = models.CharField(max_length=50)
+    checkout_request_id = models.CharField(max_length=50)
+    result_code = models.CharField(max_length=10)
+    result_description = models.TextField()
+    amount = models.DecimalField(max_digits=20, decimal_places=5, null=True)
+    mpesa_receipt_number = models.TextField()
+    tranaction_date = models.TextField()
+    phonenumber = models.TextField()
+    class Meta:
+        db_table = 'PaymentCallback'
