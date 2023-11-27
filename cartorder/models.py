@@ -42,6 +42,7 @@ class payment_response(models.Model):
     response_code = models.CharField(max_length=10)
     response_description = models.TextField()
     customer_message = models.TextField()
+    order_id = models.TextField()
     class Meta:
         db_table = 'PaymentResponse'
 
