@@ -11,7 +11,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 import random
 import string
 import time
-from .models import CartOrder,CartProduct
+from .models import CartOrder,CartProduct,payment_response,payment_callback
 from cartorder.utils import Util
 # Create your views here.
 from rest_framework.decorators import permission_classes, authentication_classes
@@ -19,6 +19,21 @@ from rest_framework.decorators import api_view
 import requests
 from datetime import datetime
 import base64
+
+def get_access_token():
+    consumer_key = 'exbuAJUwq02smG5sr6OSDpbSlqto0irc'
+    secret_key = 'cTIxXjaGtCdYL4BV'
+    access_token_url = 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
+    headers = {'Content-Type': 'application/json'}
+    auth = (consumer_key, secret_key)
+    try:
+        response = requests.get(access_token_url, headers=headers, auth=auth)
+        response.raise_for_status()
+        result = response.json()
+        access_token = result['access_token']
+        return access_token        
+    except requests.exceptions.RequestException as e:
+        return {'error': str(e)}
 
 def send_verification_email(email,name,orderid,usertype):
 
@@ -36,66 +51,281 @@ def create_order_id():
     return order_id
 
 
+# class CreateOrderView(APIView):
+#     renderer_classes = [UserRenderer]
+#     permission_classes = [IsAuthenticated]
+#     authentication_classes = [JWTAuthentication]
+#     def post(self,request,format=None):
+#         try:
+#             requested_data  = request.data
+#             requested_data['order_id'] = create_order_id()
+#             requested_data['order_status'] = "in progress"
+#             requested_data['email'] = request.user.email
+            
+#             order_list = requested_data['order_list']
+#             del requested_data['order_list']
+#             print(requested_data)
+#             serializer = CartOrderSerializer(data=requested_data)
+#             if serializer.is_valid(raise_exception=True):
+#                 value = serializer.save()
+#                 for product_loop in order_list:
+#                     product_loop['order_id'] = value.id
+#                     product_loop['total_price']  = product_loop['price'] * product_loop['product_quantity']
+#                     serializer_products = CartProductSerializer(data=product_loop)
+#                     if serializer_products.is_valid(raise_exception=True):                        
+#                         serializer_products.save()
+
+
+#                 send_verification_email(request.user.email,requested_data['first_name'],requested_data['order_id'],"user")    
+#                 send_verification_email('alioffice374@gmail.com',requested_data['first_name'],requested_data['order_id'],"admin")
+#                 return Response({'success':'success'},status=status.HTTP_200_OK)
+#         except Exception as E:
+#             print(E)
+#             return Response({'error':'something went wrong'},status=status.HTTP_400_BAD_REQUEST)
+
+# class CreateNotLoginOrderView(APIView):    
+#     def post(self,request,format=None):
+#         try:
+#             requested_data  = request.data
+#             requested_data['order_id'] = create_order_id()
+#             requested_data['order_status'] = "in progress"
+#             # requested_data['email'] = request.user.email
+            
+#             order_list = requested_data['order_list']
+#             del requested_data['order_list']
+#             print(requested_data)
+#             serializer = CartOrderSerializer(data=requested_data)
+#             if serializer.is_valid(raise_exception=True):
+#                 value = serializer.save()
+#                 for product_loop in order_list:
+#                     product_loop['order_id'] = value.id
+#                     product_loop['total_price']  = product_loop['price'] * product_loop['product_quantity']
+#                     serializer_products = CartProductSerializer(data=product_loop)
+#                     if serializer_products.is_valid(raise_exception=True):                        
+#                         serializer_products.save()
+
+
+#                 send_verification_email(requested_data['email'],requested_data['first_name'],requested_data['order_id'],"user")    
+#                 send_verification_email('alioffice374@gmail.com',requested_data['first_name'],requested_data['order_id'],"admin")
+#                 return Response({'success':'success'},status=status.HTTP_200_OK)
+#         except Exception as E:
+#             print(E)
+#             return Response({'error':'something went wrong'},status=status.HTTP_400_BAD_REQUEST)
+
 class CreateOrderView(APIView):
     renderer_classes = [UserRenderer]
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
     def post(self,request,format=None):
-        try:
+        access_token = get_access_token()
+        if access_token:
+            amount = request.data.get('amount')
+            phone = request.data.get('phone')
+            order_id = create_order_id()
             requested_data  = request.data
-            requested_data['order_id'] = create_order_id()
+            requested_data['order_id'] = order_id
             requested_data['order_status'] = "in progress"
+            del requested_data['amount']
             requested_data['email'] = request.user.email
             
             order_list = requested_data['order_list']
             del requested_data['order_list']
             print(requested_data)
-            serializer = CartOrderSerializer(data=requested_data)
-            if serializer.is_valid(raise_exception=True):
-                value = serializer.save()
-                for product_loop in order_list:
-                    product_loop['order_id'] = value.id
-                    product_loop['total_price']  = product_loop['price'] * product_loop['product_quantity']
-                    serializer_products = CartProductSerializer(data=product_loop)
-                    if serializer_products.is_valid(raise_exception=True):                        
-                        serializer_products.save()
+
+            if amount!= None and phone!=None:
+                passkey = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"
+                business_short_code = '174379'
+                process_request_url = 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
+                callback_url = 'https://api.darajambili.com/express-payment'
+                timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+                password = base64.b64encode((business_short_code + passkey + timestamp).encode()).decode()
+                party_a = phone
+                party_b = '254708374149'
+                account_reference = 'CompanyXLTD'
+                transaction_desc = 'stkpush test'
+                stk_push_headers = {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + access_token
+                }
+
+                stk_push_payload = {
+                    'BusinessShortCode': business_short_code,
+                    'Password': password,
+                    'Timestamp': timestamp,
+                    'TransactionType': 'CustomerPayBillOnline',
+                    'Amount': amount,
+                    'PartyA': party_a,
+                    'PartyB': business_short_code,
+                    'PhoneNumber': party_a,
+                    'CallBackURL': callback_url,
+                    'AccountReference': account_reference,
+                    'TransactionDesc': transaction_desc
+                }
+                try:
+                    response = requests.post(process_request_url, headers=stk_push_headers, json=stk_push_payload)
+                    response.raise_for_status()
+
+                    data_insetion = dict()
+                    data_insetion['merchant_request_id'] = response.json()['MerchantRequestID']
+                    data_insetion['checkout_request_id'] = response.json()['CheckoutRequestID']
+                    data_insetion['response_code'] = response.json()['ResponseCode']
+                    data_insetion['response_description'] = response.json()['ResponseDescription']
+                    data_insetion['customer_message'] = response.json()['CustomerMessage']
+                    data_insetion['order_id'] =order_id
+
+                    if response.json()['ResponseCode'] == "0":                        
+                        serializer = PaymentResponseSerializer(data=data_insetion)
+                        if serializer.is_valid(raise_exception=True):
+                            value = serializer.save()
+                            while True:
+                                try:                                    
+                                    check_order = payment_callback.objects.get(merchant_request_id=data_insetion['merchant_request_id'])
+                                    # check_order = payment_callback.objects.get(merchant_request_id='8656-21324585-1')
+                                    callback_Serializer = PaymentCallbackSerializer(check_order)
+
+                                    callback_Serializer = callback_Serializer.data
+                                    if check_order.result_code:
+                                        break
+                                except Exception as E:                                    
+                                    pass    
+
+                            if callback_Serializer['result_code'] == '0':
+                                try:
+                                    serializer = CartOrderSerializer(data=requested_data)
+                                    if serializer.is_valid(raise_exception=True):
+                                        value = serializer.save()
+                                        for product_loop in order_list:
+                                            product_loop['order_id'] = value.id
+                                            product_loop['total_price']  = product_loop['price'] * product_loop['product_quantity']
+                                            serializer_products = CartProductSerializer(data=product_loop)
+                                            if serializer_products.is_valid(raise_exception=True):                        
+                                                serializer_products.save()
+
+                                        send_verification_email(requested_data['email'],requested_data['first_name'],requested_data['order_id'],"user")    
+                                        send_verification_email('alioffice374@gmail.com',requested_data['first_name'],requested_data['order_id'],"admin")
+                                        return Response({'success':'success'},status=status.HTTP_200_OK)
+                                except Exception as E:
+                                    print(E)
+                                    return Response({'error':'error'},status=status.HTTP_400_BAD_REQUEST)
 
 
-                send_verification_email(request.user.email,requested_data['first_name'],requested_data['order_id'],"user")    
-                send_verification_email('alioffice374@gmail.com',requested_data['first_name'],requested_data['order_id'],"admin")
-                return Response({'success':'success'},status=status.HTTP_200_OK)
-        except Exception as E:
-            print(E)
-            return Response({'error':'something went wrong'},status=status.HTTP_400_BAD_REQUEST)
+                            else:
+                                return Response({'error':callback_Serializer['result_description']},status=status.HTTP_400_BAD_REQUEST)
+
+                    else:
+                        return Response({'error':'STK push failed'},status=status.HTTP_400_BAD_REQUEST)
+                except requests.exceptions.RequestException as e:
+                    return Response({'error':e},status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({'error':'amount or phone no is missing'},status=status.HTTP_200_OK)
+        else:    
+            return Response({'error':'invalid access token'},status=status.HTTP_200_OK) 
 
 class CreateNotLoginOrderView(APIView):    
     def post(self,request,format=None):
-        try:
+        access_token = get_access_token()
+        if access_token:
+            amount = request.data.get('amount')
+            phone = request.data.get('phone')
+            order_id = create_order_id()
             requested_data  = request.data
-            requested_data['order_id'] = create_order_id()
+            requested_data['order_id'] = order_id
             requested_data['order_status'] = "in progress"
+            del requested_data['amount']
             # requested_data['email'] = request.user.email
             
             order_list = requested_data['order_list']
             del requested_data['order_list']
             print(requested_data)
-            serializer = CartOrderSerializer(data=requested_data)
-            if serializer.is_valid(raise_exception=True):
-                value = serializer.save()
-                for product_loop in order_list:
-                    product_loop['order_id'] = value.id
-                    product_loop['total_price']  = product_loop['price'] * product_loop['product_quantity']
-                    serializer_products = CartProductSerializer(data=product_loop)
-                    if serializer_products.is_valid(raise_exception=True):                        
-                        serializer_products.save()
+
+            if amount!= None and phone!=None:
+                passkey = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"
+                business_short_code = '174379'
+                process_request_url = 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
+                callback_url = 'https://api.darajambili.com/express-payment'
+                timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+                password = base64.b64encode((business_short_code + passkey + timestamp).encode()).decode()
+                party_a = phone
+                party_b = '254708374149'
+                account_reference = 'CompanyXLTD'
+                transaction_desc = 'stkpush test'
+                stk_push_headers = {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + access_token
+                }
+
+                stk_push_payload = {
+                    'BusinessShortCode': business_short_code,
+                    'Password': password,
+                    'Timestamp': timestamp,
+                    'TransactionType': 'CustomerPayBillOnline',
+                    'Amount': amount,
+                    'PartyA': party_a,
+                    'PartyB': business_short_code,
+                    'PhoneNumber': party_a,
+                    'CallBackURL': callback_url,
+                    'AccountReference': account_reference,
+                    'TransactionDesc': transaction_desc
+                }
+                try:
+                    response = requests.post(process_request_url, headers=stk_push_headers, json=stk_push_payload)
+                    response.raise_for_status()
+
+                    data_insetion = dict()
+                    data_insetion['merchant_request_id'] = response.json()['MerchantRequestID']
+                    data_insetion['checkout_request_id'] = response.json()['CheckoutRequestID']
+                    data_insetion['response_code'] = response.json()['ResponseCode']
+                    data_insetion['response_description'] = response.json()['ResponseDescription']
+                    data_insetion['customer_message'] = response.json()['CustomerMessage']
+                    data_insetion['order_id'] =order_id
+
+                    if response.json()['ResponseCode'] == "0":                        
+                        serializer = PaymentResponseSerializer(data=data_insetion)
+                        if serializer.is_valid(raise_exception=True):
+                            value = serializer.save()
+                            while True:
+                                try:                                    
+                                    check_order = payment_callback.objects.get(merchant_request_id=data_insetion['merchant_request_id'])
+                                    # check_order = payment_callback.objects.get(merchant_request_id='8656-21324585-1')
+                                    callback_Serializer = PaymentCallbackSerializer(check_order)
+
+                                    callback_Serializer = callback_Serializer.data
+                                    if check_order.result_code:
+                                        break
+                                except Exception as E:                                    
+                                    pass    
+
+                            if callback_Serializer['result_code'] == '0':
+                                try:
+                                    serializer = CartOrderSerializer(data=requested_data)
+                                    if serializer.is_valid(raise_exception=True):
+                                        value = serializer.save()
+                                        for product_loop in order_list:
+                                            product_loop['order_id'] = value.id
+                                            product_loop['total_price']  = product_loop['price'] * product_loop['product_quantity']
+                                            serializer_products = CartProductSerializer(data=product_loop)
+                                            if serializer_products.is_valid(raise_exception=True):                        
+                                                serializer_products.save()
+
+                                        send_verification_email(requested_data['email'],requested_data['first_name'],requested_data['order_id'],"user")    
+                                        send_verification_email('alioffice374@gmail.com',requested_data['first_name'],requested_data['order_id'],"admin")
+                                        return Response({'success':'success'},status=status.HTTP_200_OK)
+                                except Exception as E:
+                                    print(E)
+                                    return Response({'error':'error'},status=status.HTTP_400_BAD_REQUEST)
 
 
-                send_verification_email(requested_data['email'],requested_data['first_name'],requested_data['order_id'],"user")    
-                send_verification_email('alioffice374@gmail.com',requested_data['first_name'],requested_data['order_id'],"admin")
-                return Response({'success':'success'},status=status.HTTP_200_OK)
-        except Exception as E:
-            print(E)
-            return Response({'error':'something went wrong'},status=status.HTTP_400_BAD_REQUEST)
+                            else:
+                                return Response({'error':callback_Serializer['result_description']},status=status.HTTP_400_BAD_REQUEST)
+
+                    else:
+                        return Response({'error':'STK push failed'},status=status.HTTP_400_BAD_REQUEST)
+                except requests.exceptions.RequestException as e:
+                    return Response({'error':e},status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({'error':'amount or phone no is missing'},status=status.HTTP_200_OK)
+        else:    
+            return Response({'error':'invalid access token'},status=status.HTTP_200_OK)        
 
 class SearchOrderView(APIView):
     # renderer_classes = [UserRenderer]
@@ -211,20 +441,7 @@ def get_orders_by_car_linkage_id(request, *args, **kwargs):
         return Response({'error':'linkageid cannot be null'},status=status.HTTP_400_BAD_REQUEST)
 
 
-def get_access_token():
-    consumer_key = 'exbuAJUwq02smG5sr6OSDpbSlqto0irc'
-    secret_key = 'cTIxXjaGtCdYL4BV'
-    access_token_url = 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
-    headers = {'Content-Type': 'application/json'}
-    auth = (consumer_key, secret_key)
-    try:
-        response = requests.get(access_token_url, headers=headers, auth=auth)
-        response.raise_for_status()
-        result = response.json()
-        access_token = result['access_token']
-        return access_token        
-    except requests.exceptions.RequestException as e:
-        return {'error': str(e)}        
+        
 
 @api_view(['POST'])
 def payment_response(request, *args, **kwargs):    
@@ -232,6 +449,7 @@ def payment_response(request, *args, **kwargs):
     if access_token:
         amount = request.data.get('amount')
         phone = request.data.get('phone')
+        order_id = request.data.get('order_id')
         if amount!= None and phone!=None:
             passkey = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"
             business_short_code = '174379'
@@ -271,6 +489,7 @@ def payment_response(request, *args, **kwargs):
                 data_insetion['response_code'] = response.json()['ResponseCode']
                 data_insetion['response_description'] = response.json()['ResponseDescription']
                 data_insetion['customer_message'] = response.json()['CustomerMessage']
+                data_insetion['order_id'] =order_id
 
                 if response.json()['ResponseCode'] == "0":
                     a=1
@@ -291,7 +510,7 @@ def payment_response(request, *args, **kwargs):
 
 
 @api_view(['POST'])
-def payment_callback(request, *args, **kwargs):
+def payment_callback_response(request, *args, **kwargs):
     received_data = request.data
     if received_data:
         callback = received_data['Body']['stkCallback']
