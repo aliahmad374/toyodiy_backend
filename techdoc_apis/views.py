@@ -994,10 +994,7 @@ def AutoCompleteSuggestions(request,*args,**kwargs):
                         if (again_else_loop['Quantity_article'] !=0) and (again_else_loop['price2']!=0) :
                             print('i am printing price') 
                             finale_result.append(again_else_loop)
-
-
-                    
-                
+                                    
                 return Response({'parts':finale_result})
             else:
                 return Response({'error':'searchQuery not found'})
