@@ -21,18 +21,26 @@ from datetime import datetime
 import base64
 
 def get_access_token():
-    consumer_key = 'exbuAJUwq02smG5sr6OSDpbSlqto0irc'
-    secret_key = 'cTIxXjaGtCdYL4BV'
-    access_token_url = 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
+    consumer_key = 'onZSDWpPo5JvmSBKrVptPpA7GwyXI7As'
+    secret_key = 'fxKaP11mv8MGQwEa'
+    access_token_url = 'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
     headers = {'Content-Type': 'application/json'}
     auth = (consumer_key, secret_key)
+    print('---before function---')
     try:
         response = requests.get(access_token_url, headers=headers, auth=auth)
+        print('---after function---')
         response.raise_for_status()
         result = response.json()
         access_token = result['access_token']
+        print('----------------------------')
+        print(result)
+        print(access_token)
+        print(response.status_code)
+        print('----------------------------')
         return access_token        
-    except requests.exceptions.RequestException as e:
+    except Exception as e:
+        print(e)
         return {'error': str(e)}
 
 def send_verification_email(email,name,orderid,usertype):
@@ -133,16 +141,16 @@ class CreateOrderView(APIView):
             print(requested_data)
 
             if amount!= None and phone!=None:
-                passkey = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"
-                business_short_code = '174379'
-                process_request_url = 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
-                callback_url = 'https://api.darajambili.com/express-payment'
+                passkey = "4a3eabf85711e98a4524e53e878678ce44fc05e72b6f7f34040c29fceedd2471"
+                business_short_code = '4045009'
+                process_request_url = 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
+                callback_url = 'https://192.3.255.167/checkout/payment_callback/'
                 timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
                 password = base64.b64encode((business_short_code + passkey + timestamp).encode()).decode()
                 party_a = phone
                 party_b = '254708374149'
-                account_reference = 'CompanyXLTD'
-                transaction_desc = 'stkpush test'
+                account_reference = 'impala'
+                transaction_desc = 'bill payment'
                 stk_push_headers = {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + access_token
@@ -223,7 +231,9 @@ class CreateOrderView(APIView):
 
 class CreateNotLoginOrderView(APIView):    
     def post(self,request,format=None):
+        print('here-----------')
         access_token = get_access_token()
+        print('here-----------')
         if access_token:
             amount = request.data.get('amount')
             phone = request.data.get('phone')
@@ -239,16 +249,16 @@ class CreateNotLoginOrderView(APIView):
             print(requested_data)
 
             if amount!= None and phone!=None:
-                passkey = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"
-                business_short_code = '174379'
-                process_request_url = 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
-                callback_url = 'https://api.darajambili.com/express-payment'
+                passkey = "4a3eabf85711e98a4524e53e878678ce44fc05e72b6f7f34040c29fceedd2471"
+                business_short_code = '4045009'
+                process_request_url = 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
+                callback_url = 'https://192.3.255.167/checkout/payment_callback/'
                 timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
                 password = base64.b64encode((business_short_code + passkey + timestamp).encode()).decode()
                 party_a = phone
                 party_b = '254708374149'
-                account_reference = 'CompanyXLTD'
-                transaction_desc = 'stkpush test'
+                account_reference = 'impala'
+                transaction_desc = 'bill payment'
                 stk_push_headers = {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + access_token
@@ -453,7 +463,7 @@ def payment_response(request, *args, **kwargs):
         if amount!= None and phone!=None:
             passkey = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"
             business_short_code = '174379'
-            process_request_url = 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
+            process_request_url = 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
             callback_url = 'https://api.darajambili.com/express-payment'
             timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
             password = base64.b64encode((business_short_code + passkey + timestamp).encode()).decode()
