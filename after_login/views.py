@@ -31,7 +31,7 @@ class UserVehicleView(APIView):
             user = User.objects.get(email=request.user)
             print(user)
             total_cars = UserVehicle.objects.filter(user=user)
-            if len(total_cars)==2:               
+            if len(total_cars)==10:               
                 return Response({'msg':'You have reached your limit to add vehicle'}   ,status=status.HTTP_200_OK)
             
             already_exist = UserVehicle.objects.filter(user=user,model_id=deserialized_data['model_id'])
@@ -54,7 +54,7 @@ class UserVehicleView(APIView):
         }
         for loop in se.data:
             print(loop['model_id'])
-            url= f"http://127.0.0.1:8000/techdoc/sidebar/?linkageTargetIds="+str(int(loop['model_id']))
+            url= f"http://127.0.0.1:8000/techdoc/sidebar/?linkageTargetIds="+str(loop['model_id'])
             try:
                 all_vehicle.append(json.loads(requests.get(url=url,headers=headers).text))
             except Exception as E:

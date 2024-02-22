@@ -128,26 +128,28 @@ class CreateOrderView(APIView):
         access_token = get_access_token()
         if access_token:
             amount = request.data.get('amount')
-            phone = request.data.get('phone')
+            # phone = request.data.get('phone')
+            mpesa_phone = request.data.get('mpesaphone')
             order_id = create_order_id()
             requested_data  = request.data
             requested_data['order_id'] = order_id
             requested_data['order_status'] = "in progress"
             del requested_data['amount']
+            del requested_data['mpesaphone']
             requested_data['email'] = request.user.email
             
             order_list = requested_data['order_list']
             del requested_data['order_list']
             print(requested_data)
 
-            if amount!= None and phone!=None:
+            if amount!= None and mpesa_phone!=None:
                 passkey = "4a3eabf85711e98a4524e53e878678ce44fc05e72b6f7f34040c29fceedd2471"
                 business_short_code = '4045009'
                 process_request_url = 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
                 callback_url = 'https://192.3.255.167/checkout/payment_callback/'
                 timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
                 password = base64.b64encode((business_short_code + passkey + timestamp).encode()).decode()
-                party_a = phone
+                party_a = mpesa_phone
                 party_b = '254708374149'
                 account_reference = 'impala'
                 transaction_desc = 'bill payment'
@@ -236,26 +238,28 @@ class CreateNotLoginOrderView(APIView):
         print('here-----------')
         if access_token:
             amount = request.data.get('amount')
-            phone = request.data.get('phone')
+            # phone = request.data.get('phone')
+            mpesa_phone = request.data.get('mpesaphone')
             order_id = create_order_id()
             requested_data  = request.data
             requested_data['order_id'] = order_id
             requested_data['order_status'] = "in progress"
             del requested_data['amount']
+            del requested_data['mpesaphone']
             # requested_data['email'] = request.user.email
             
             order_list = requested_data['order_list']
             del requested_data['order_list']
             print(requested_data)
 
-            if amount!= None and phone!=None:
+            if amount!= None and mpesa_phone!=None:
                 passkey = "4a3eabf85711e98a4524e53e878678ce44fc05e72b6f7f34040c29fceedd2471"
                 business_short_code = '4045009'
                 process_request_url = 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
                 callback_url = 'https://192.3.255.167/checkout/payment_callback/'
                 timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
                 password = base64.b64encode((business_short_code + passkey + timestamp).encode()).decode()
-                party_a = phone
+                party_a = mpesa_phone
                 party_b = '254708374149'
                 account_reference = 'impala'
                 transaction_desc = 'bill payment'
